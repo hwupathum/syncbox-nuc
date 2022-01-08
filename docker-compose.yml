@@ -11,3 +11,13 @@ database:
         MYSQL_DATABASE: syncbox
         MYSQL_USER: root
         MYSQL_PASSWORD: secret
+
+config-server:
+    image: config-server
+    build:
+      context: .
+      dockerfile: config-server/Dockerfile
+    ports:
+      - "1901:1901"
+    links:
+      - database
