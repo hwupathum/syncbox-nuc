@@ -1,0 +1,11 @@
+CREATE DATABASE IF NOT EXISTS syncbox;
+
+USE syncbox;
+
+CREATE TABLE IF NOT EXISTS users (
+    userid INT NOT NULL AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL,
+    password VARCHAR(50) NOT NULL,
+    scope VARCHAR(50) NOT NULL,
+    PRIMARY KEY (userid)
+);
