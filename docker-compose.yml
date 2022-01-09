@@ -1,28 +1,27 @@
 version: '2.0'
 
 services:
-  database:
-      image: mysql:5.7
-      ports:
-          - "3306:3306"
-      command: --init-file /data/application/init.sql
-      volumes:
-          - ./init.sql:/data/application/init.sql
-          - db_data:/var/lib/mysql
-      environment:
-          MYSQL_ROOT_USER: root
-          MYSQL_ROOT_PASSWORD: secret
-          MYSQL_DATABASE: syncbox
+  # database:
+  #     image: mysql:5.7
+  #     ports:
+  #         - "3306:3306"
+  #     command: --init-file /data/application/init.sql
+  #     volumes:
+  #         - ./init.sql:/data/application/init.sql
+  #         - db_data:/var/lib/mysql
+  #     environment:
+  #         MYSQL_ROOT_USER: root
+  #         MYSQL_ROOT_PASSWORD: secret
+  #         MYSQL_DATABASE: syncbox
 
   config-server:
       image: config-server
       build:
-        context: .
-        dockerfile: config-server/Dockerfile
+        context: ./config-server
       ports:
         - "1901:1901"
-      links:
-        - database
+      # links:
+      #   - database
         
 volumes:
     db_data:
