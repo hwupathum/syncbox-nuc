@@ -9,7 +9,6 @@ import createConfig from './seafile_utils/createConfig';
 import getToken from './seafile_utils/getToken';
 import path from 'path';
 import fs from 'fs';
-import bcrypt from 'bcrypt';
 import cron from 'node-cron';
 import yaml from 'js-yaml';
 import unmountDirectory from './system_utils/unmountDirectory';
@@ -17,6 +16,7 @@ import { getUser, deleteUser, scheduleDownload, getAllSchedulers, deleteSchedule
 import { addNewUser, getUserByUsername, updateUserPasswordByUsername } from './database/repository';
 import deleteDirectory from './system_utils/deleteDirectory';
 import { ExecException } from 'child_process';
+import { comparePassword, hashPassword } from './security/bcrypt';
 
 require('dotenv').config();
 
@@ -416,41 +416,6 @@ function getUserFromConfigFile(username: string): any {
     } catch (e) {
         return { error: e }
     }
-}
-
-function updateUserPassword(username: string, password: string) {
-    try {
-        let data: any = yaml.load(fs.readFileSync(config_file_location, 'utf8'));
-        let users = data.users ?? [];
-
-        for (let i = 0; i < users.length; i++) {
-            let user_object = users[i];
-            if (user_object.username === username) {
-                bcrypt.hash(password, 10, function (err: any, hash: string) {
-                    if (err) {
-                        console.error(err);
-                    } else if (hash) {
-                        user_object.password = `{bcrypt}${hash}`;
-                        data.users[i] = user_object;
-                        let yaml_string = yaml.dump(data);
-                        fs.writeFileSync(config_file_location, yaml_string, 'utf8');
-                        console.log(`Successfully updated the password of ${username}...`);
-                    }
-                });
-                break;
-            }
-        }
-    } catch (error) {
-        console.error(`An error occurred ${error}`);
-    }
-}
-
-function hashPassword(password: string, callback: Function) {
-    bcrypt.hash(password, 10, (err: any, hash: string) => callback(err, `{bcrypt}${hash}`));
-}
-
-function comparePassword(old_password: string, new_password: string, callback: Function) {
-    bcrypt.compare(old_password, new_password, (err, reply) => callback(err, reply));
 }
 
 function updateConfigurationFile(file_name: string, new_token: string) {
