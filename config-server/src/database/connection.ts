@@ -8,4 +8,13 @@ const user = process.env.DATABASE_USER ?? 'root'
 const password = process.env.DATABASE_PASSWORD ?? 'secret';
 const database = process.env.DATABASE_NAME ?? 'syncbox';
 
-export default mysql.createConnection({ host, port, user, password, database });
+const connection = mysql.createConnection({ host, port, user, password, database });
+connection.connect((error) => {
+    if (error) {
+        console.error('error connecting: ' + error.stack);
+        return;
+    }
+    console.log('connected as id ' + connection.threadId);
+});
+
+export default connection;
