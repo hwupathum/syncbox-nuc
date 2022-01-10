@@ -14,7 +14,7 @@ import cron from 'node-cron';
 import yaml from 'js-yaml';
 import unmountDirectory from './system_utils/unmountDirectory';
 import { getUser, deleteUser, scheduleDownload, getAllSchedulers, deleteScheduler } from './system_utils/redis';
-import { addNewUser, getUserByUsername } from './database/repository';
+import { addNewUser, getUserByUsername, updateUserPasswordByUsername } from './database/repository';
 import deleteDirectory from './system_utils/deleteDirectory';
 import { ExecException } from 'child_process';
 
@@ -60,6 +60,7 @@ app.post('/register', (req, res) => {
     getUserByUsername(username, (error: any, result: any, fields: any) => {
         if (error) {
             console.error(error);
+            res.status(500).send({ error: error.message });
         } else if (result.length > 0) {
             console.log(`Successfully received the user ${username} from the database...`);
             console.error(`User: ${username} is already registered`);
@@ -90,17 +91,24 @@ app.post('/register', (req, res) => {
 
                         // Mounting the directory
                         mountSeadrive(`${user_directory}/seadrive.conf`, `${user_directory}/data`, `${user_directory}/seadrive.log`, true);
-                        hashPassword(password, (hash: string) => addNewUser(username, hash, `${user_directory}/data`, (error: any, result: any, fields: any) => {
+                        hashPassword(password, (error: Error | undefined, hash: string) => {
                             if (error) {
                                 console.error(error);
                                 res.status(500).send({ error: error.message });
                             } else {
-                                console.log(`Successfully saved the user ${username} in the database...`);
-                                console.log(`Successfully logged in...`);
-                                req.session.user = { name: username, token: opt.token };
-                                res.status(200).send({ token: opt.token });
+                                addNewUser(username, hash, `${user_directory}/data`, (error: any, result: any, fields: any) => {
+                                    if (error) {
+                                        console.error(error);
+                                        res.status(500).send({ error: error.message });
+                                    } else {
+                                        console.log(`Successfully saved the user ${username} in the database...`);
+                                        console.log(`Successfully logged in...`);
+                                        req.session.user = { name: username, token: opt.token };
+                                        res.status(200).send({ token: opt.token });
+                                    }
+                                });
                             }
-                        }));
+                        });
                     } else {
                         console.error(error ? error.message : stderr);
                         res.status(500).send({ error: error ? error.message : stderr });
@@ -115,74 +123,89 @@ app.post('/login', async (req, res) => {
     let username: string = req.body.username;
     let password: string = req.body.password;
     console.log(`Login request... Username: ${username}`);
-    let data: any = getUserFromConfigFile(username);
-    // updateUserPassword(username, '123');
 
-    // check user is registered
-    if (data?.error) {
-        console.error(`An error occurred... ${data.error.message}`);
-        res.status(500).send({ error: data.error.message });
-    } else if (data?.user) {
-        let user_data = data.user;
-        // get access token from server
-        getToken(seeafile_host, username, password, (error: ExecException | null, stdout: string, stderr: string) => {
-            if (stdout) {
-                let opt: any = JSON.parse(stdout);
-                if (opt.non_field_errors) {
-                    bcrypt.compare(password, user_data.password, (error, reply) => {
+    getUserByUsername(username, (error: any, result: any, fields: any) => {
+        if (error) {
+            console.error(`An error occurred... ${error.message}`);
+            res.status(500).send({ error: error.message });
+        } else if (result.length > 0) {
+            let user_data = result[0];
+
+            // get access token from server
+            getToken(seeafile_host, username, password, (error: ExecException | null, stdout: string, stderr: string) => {
+                if (stdout) {
+                    let opt: any = JSON.parse(stdout);
+                    if (opt.non_field_errors) {
+                        comparePassword(password, user_data.password, (error: Error | undefined, reply: boolean) => {
+                            if (error) {
+                                console.error(`An error occurred... ${error.message}`);
+                                res.status(500).send({ error: error.message });
+                            } else if (reply) {
+                                // Server password changed but not updated the SyncBox
+                                console.error(`${username} has changed the server password...`);
+                                res.status(401).send({ error: 'Server password was changed' });
+                            } else {
+                                console.error(`An error occurred... ${opt.non_field_errors}`);
+                                res.status(401).send({ error: opt.non_field_errors });
+                            }
+                        });
+                    } else if (opt.token) {
+                        comparePassword(password, user_data.password, (error: Error | undefined, reply: boolean) => {
+                            if (!reply) {
+                                // update the SyncBox password and configuration file
+                                // saveUserInRedis(username, password, `${base_directory}/${username}/data`);
+                                hashPassword(password, (error: Error | undefined, hash: string) => {
+                                    if (error) {
+                                        console.error(error);
+                                        res.status(500).send({ error: error.message });
+                                    } else {
+                                        updateUserPasswordByUsername(username, hash, (error: any, result: any, fields: any) => {
+                                            if (error) {
+                                                console.error(error);
+                                                res.status(500).send({ error: error.message });
+                                            } else {
+                                                console.log(`Successfully updated the password of ${username} in the database...`);
+                                            }
+                                        });
+                                    }
+                                });
+                                // updateUserPassword(username, password);
+                                updateConfigurationFile(`${base_directory}/${username}/seadrive.conf`, opt.token);
+                            }
+                            console.log(`${username} successfully logged in...`);
+                            req.session.user = { name: username, token: opt.token };
+                            res.status(200).send({ token: opt.token });
+                        });
+                    }
+                } else {
+                    // cannot connect to the server
+                    console.error(error?.message);
+                    comparePassword(password, user_data.password, (error: Error | undefined, reply: boolean) => {
                         if (error) {
                             console.error(`An error occurred... ${error.message}`);
                             res.status(500).send({ error: error.message });
                         } else if (reply) {
-                            // Server password changed but not updated the SyncBox
-                            console.error(`${username} has changed the server password...`);
-                            res.status(401).send({ error: 'Server password was changed' });
+                            let { token, error } = getTokenFromConfigFile(username);
+                            if (error) {
+                                console.error(`An error occurred... ${error}`);
+                                res.status(500).send({ error });
+                            } else if (token) {
+                                console.log(`${username} successfully logged in...`);
+                                req.session.user = { name: username, token };
+                                res.status(200).send({ token });
+                            }
                         } else {
-                            console.error(`An error occurred... ${opt.non_field_errors}`);
-                            res.status(401).send({ error: opt.non_field_errors });
+                            console.error('Incorrect credentials');
+                            res.status(401).send({ error: 'Incorrect credentials' });
                         }
-                    });
-                } else if (opt.token) {
-                    bcrypt.compare(password, user_data.password, (error, reply) => {
-                        if (!reply) {
-                            // update the SyncBox password and configuration file
-                            // saveUserInRedis(username, password, `${base_directory}/${username}/data`);
-                            updateUserPassword(username, password);
-                            updateConfigurationFile(`${base_directory}/${username}/seadrive.conf`, opt.token);
-                        }
-                        console.log(`Successfully logged in... Username: ${username}, Token: ${opt.token}`);
-                        req.session.user = { name: username, token: opt.token };
-                        res.status(200).send({ token: opt.token });
                     });
                 }
-            } else {
-                // cannot connect to the server
-                console.error(error?.message);
-                bcrypt.compare(password, user_data.password, (error, reply) => {
-                    if (error) {
-                        console.error(`An error occurred... ${error.message}`);
-                        res.status(500).send({ error: error.message });
-                    } else if (reply) {
-                        let { token, error } = getTokenFromConfigFile(username);
-                        if (error) {
-                            console.error(`An error occurred... ${error}`);
-                            res.status(500).send({ error });
-                        } else if (token) {
-                            console.log(`Successfully logged in... Username: ${username}, Token: ${token}`);
-                            req.session.user = { name: username, token };
-                            res.status(200).send({ token });
-                        }
-                    } else {
-                        console.error('Incorrect credentials');
-                        res.status(401).send({ error: 'Incorrect credentials' });
-                    }
-                });
-            }
-        });
-    } else {
-        console.error(`User: ${username} is not registered`);
-        res.status(500).send({ error: `User: ${username} is not registered` });
-    }
+            });
+        } else {
+            console.error(`User: ${username} is not registered`);
+            res.status(500).send({ error: `User: ${username} is not registered` });
+        }
+    });
 });
 
 app.get('/data', async (req, res) => {
@@ -423,12 +446,11 @@ function updateUserPassword(username: string, password: string) {
 }
 
 function hashPassword(password: string, callback: Function) {
-    bcrypt.hash(password, 10, function (err: any, hash: string) {
-        if (err) {
-            console.error(err);
-        }
-        callback(hash);
-    });
+    bcrypt.hash(password, 10, (err: any, hash: string) => callback(err, `{bcrypt}${hash}`));
+}
+
+function comparePassword(old_password: string, new_password: string, callback: Function) {
+    bcrypt.compare(old_password, new_password, (err, reply) => callback(err, reply));
 }
 
 function updateConfigurationFile(file_name: string, new_token: string) {
