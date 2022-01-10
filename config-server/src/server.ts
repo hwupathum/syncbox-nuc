@@ -13,7 +13,8 @@ import bcrypt from 'bcrypt';
 import cron from 'node-cron';
 import yaml from 'js-yaml';
 import unmountDirectory from './system_utils/unmountDirectory';
-import { saveUser, getAllUsers, getUser, deleteUser, scheduleDownload, getAllSchedulers, deleteScheduler } from './system_utils/redis';
+import { getUser, deleteUser, scheduleDownload, getAllSchedulers, deleteScheduler } from './system_utils/redis';
+import { addNewUser, getUserByUsername } from './database/repository';
 import deleteDirectory from './system_utils/deleteDirectory';
 import { ExecException } from 'child_process';
 
@@ -55,52 +56,59 @@ app.post('/register', (req, res) => {
     let username: string = req.body.username;
     let password: string = req.body.password;
     console.log(`Register request... Username: ${username}`);
-    let data: any = getUserFromConfigFile(username);
 
-    // check user is registered
-    if (data?.error) {
-        console.error(`An error occurred... ${data.error.message}`);
-        res.status(500).send({ error: data.error.message });
-    } else if (data?.user) {
-        console.error(`User: ${username} is already registered`);
-        res.status(500).send({ error: `User: ${username} is already registered` });
-    } else {
-        // get access token from server
-        getToken(seeafile_host, username, password, (error: ExecException | null, stdout: string, stderr: string) => {
-            if (stdout) {
-                let opt: any = JSON.parse(stdout);
-                if (opt.non_field_errors) {
-                    console.error(opt.non_field_errors);
-                    res.status(401).send({ error: 'Unable to register with the provided credentials' });
-                } else if (opt.token) {
-                    console.log(`Successfully logged in... Username: ${username}, Token: ${opt.token}`);
-                    let user_directory: string = `${base_directory}/${username}`;
-                    if (!fs.existsSync(`${user_directory}/data`)) {
+    getUserByUsername(username, (error: any, result: any, fields: any) => {
+        if (error) {
+            console.error(error);
+        } else if (result.length > 0) {
+            console.log(`Successfully received the user ${username} from the database...`);
+            console.error(`User: ${username} is already registered`);
+            res.status(500).send({ error: `User: ${username} is already registered` });
+        } else {
+            // get access token from server
+            getToken(seeafile_host, username, password, (error: ExecException | null, stdout: string, stderr: string) => {
+                if (stdout) {
+                    let opt: any = JSON.parse(stdout);
+                    if (opt.non_field_errors) {
+                        console.error(opt.non_field_errors);
+                        res.status(401).send({ error: 'Unable to register with the provided credentials' });
+                    } else if (opt.token) {
+                        console.log(`Successfully logged in... Username: ${username}`);
+                        let user_directory: string = `${base_directory}/${username}`;
+
                         // creating a directory for the user
-                        console.log(`Creating directory... ${user_directory}/data`);
-                        fs.mkdirSync(`${user_directory}/data`, { recursive: true });
-                    }
-                    if (!fs.existsSync(`${user_directory}/seadrive.conf`)) {
+                        if (!fs.existsSync(`${user_directory}/data`)) {
+                            console.log(`Creating directory... ${user_directory}/data`);
+                            fs.mkdirSync(`${user_directory}/data`, { recursive: true });
+                        }
+
                         // creating the seadrive.conf file for the user
-                        console.log(`Creating the configuration file...`);
-                        createConfig(`${user_directory}/seadrive.conf`, seeafile_host, username, opt.token, username);
+                        if (!fs.existsSync(`${user_directory}/seadrive.conf`)) {
+                            console.log(`Creating the configuration file...`);
+                            createConfig(`${user_directory}/seadrive.conf`, seeafile_host, username, opt.token, username);
+                        }
+
+                        // Mounting the directory
+                        mountSeadrive(`${user_directory}/seadrive.conf`, `${user_directory}/data`, `${user_directory}/seadrive.log`, true);
+                        hashPassword(password, (hash: string) => addNewUser(username, hash, `${user_directory}/data`, (error: any, result: any, fields: any) => {
+                            if (error) {
+                                console.error(error);
+                                res.status(500).send({ error: error.message });
+                            } else {
+                                console.log(`Successfully saved the user ${username} in the database...`);
+                                console.log(`Successfully logged in...`);
+                                req.session.user = { name: username, token: opt.token };
+                                res.status(200).send({ token: opt.token });
+                            }
+                        }));
+                    } else {
+                        console.error(error ? error.message : stderr);
+                        res.status(500).send({ error: error ? error.message : stderr });
                     }
-                    // Mounting the directory
-                    console.log(`Mounting with the Seadrive directory...`);
-                    mountSeadrive(`${user_directory}/seadrive.conf`, `${user_directory}/data`, `${user_directory}/seadrive.log`, true);
-                    // await jsonCache.set('users', users);
-                    // saveUserInRedis(username, password, `${user_directory}/data`);
-                    saveUserAndPassword(username, password, `${user_directory}/data`);
-                    console.log(`Successfully logged in...`);
-                    req.session.user = { name: username, token: opt.token };
-                    res.status(200).send({ token: opt.token });
                 }
-            } else {
-                console.error(error ? error.message : stderr);
-                res.status(500).send({ error: error ? error.message : stderr });
-            }
-        });
-    }
+            });
+        }
+    });
 });
 
 app.post('/login', async (req, res) => {
@@ -414,23 +422,13 @@ function updateUserPassword(username: string, password: string) {
     }
 }
 
-function saveUserAndPassword(username: string, password: string, directory: string) {
-    try {
-        let data: any = yaml.load(fs.readFileSync(config_file_location, 'utf8'));
-        let user_count = data.users ? data.users.length : 0;
-        bcrypt.hash(password, 10, function (err: any, hash: string) {
-            if (err) {
-                console.error(err);
-            } else if (hash) {
-                data.users[user_count] = { username, password: `{bcrypt}${hash}`, rules: { path: directory, modify: true } };
-                let yaml_string = yaml.dump(data);
-                fs.writeFileSync(config_file_location, yaml_string, 'utf8');
-                console.log(`Successfully updated the password of ${username}...`);
-            }
-        });
-    } catch (error) {
-        console.error(`An error occurred ${error}`);
-    }
+function hashPassword(password: string, callback: Function) {
+    bcrypt.hash(password, 10, function (err: any, hash: string) {
+        if (err) {
+            console.error(err);
+        }
+        callback(hash);
+    });
 }
 
 function updateConfigurationFile(file_name: string, new_token: string) {
