@@ -19,3 +19,8 @@ export function updateUserPasswordByUsername(username: string, password: string,
     let sql_query = 'UPDATE users SET password = ? WHERE username = ?';
     connection.query(sql_query, [password, username], (error, result, fields) => callback(error, result, fields));
 }
+
+export function deleteUserById(user_id: number, callback: Function) {
+    let sql_query = `DELETE FROM users WHERE user_id = ${user_id}`;
+    connection.query(sql_query, (error, result, fields) => callback(error, result, fields));
+}
