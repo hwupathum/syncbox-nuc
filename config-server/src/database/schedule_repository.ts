@@ -9,3 +9,8 @@ export function getAllSchedules(callback: Function) {
     let sql_query = 'SELECT * FROM schedules';
     connection.query(sql_query, (error, result, fields) => callback(error, result, fields));
 }
+
+export function deleteScheduleById(schedule_id: number, callback: Function) {
+    let sql_query = `DELETE FROM schedules WHERE schedule_id = ${schedule_id}`;
+    connection.query(sql_query, (error, result, fields) => callback(error, result, fields));
+}
