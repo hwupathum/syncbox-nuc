@@ -12,7 +12,7 @@ import fs from 'fs';
 import cron from 'node-cron';
 import unmountDirectory from './system_utils/unmountDirectory';
 import { getUser, deleteUser, scheduleDownload, getAllSchedulers, deleteScheduler } from './system_utils/redis';
-import { addNewUser, getUserByUsername, updateUserPasswordByUsername } from './database/repository';
+import { addNewUser, getUserByUsername, updateUserPasswordByUsername } from './database/user_repository';
 import deleteDirectory from './system_utils/deleteDirectory';
 import { ExecException } from 'child_process';
 import { comparePassword, hashPassword } from './security/bcrypt';
@@ -220,6 +220,7 @@ app.get('/data', async (req, res) => {
         }
         fs.readdir(user_directory, (error, results) => {
             if (error) {
+                console.error(error);
                 res.status(500).send({ error });
             } else if (results) {
                 const directories: any = [];

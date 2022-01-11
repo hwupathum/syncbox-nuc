@@ -1,4 +1,4 @@
-import { getAllUsers } from "../database/repository";
+import { getAllUsers } from "../database/user_repository";
 import mountSeadrive from "../seafile_utils/mountSeadrive";
 import unmountDirectory from "./unmountDirectory";
 
