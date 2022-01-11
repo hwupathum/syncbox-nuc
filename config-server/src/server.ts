@@ -10,8 +10,7 @@ import getToken from './seafile_utils/getToken';
 import path from 'path';
 import fs from 'fs';
 import unmountDirectory from './system_utils/unmountDirectory';
-import { getUser, deleteUser } from './system_utils/redis';
-import { addNewUser, getUserByUsername, updateUserPasswordByUsername } from './database/user_repository';
+import { addNewUser, deleteUserById, getUserByUsername, updateUserPasswordByUsername } from './database/user_repository';
 import deleteDirectory from './system_utils/deleteDirectory';
 import { ExecException } from 'child_process';
 import { comparePassword, hashPassword } from './security/bcrypt';
@@ -316,19 +315,19 @@ app.delete('/remove', async (req, res) => {
     console.log(`Logout request... Username: ${username}`);
 
     // check if user already registered
-    getUser(username, (error: Error | null, data: string) => {
+    getUserByUsername(username, (error: any, result: any, fields: any) => {
         if (error) {
             console.error(error.message);
             res.status(500).send({ error: error.message });
-        } else if (data) {
-            let user_data: any = JSON.parse(data);
-            deleteUser(username, (error: Error | null, reply: string) => {
+        } else if (result && result.length > 0) {
+            let user: any = result[0];
+            deleteUserById(user.userid, (error: Error | null, reply: string) => {
                 if (error) {
                     console.error(error.message);
                     res.status(500).send({ error: error.message });
                 } else {
-                    unmountDirectory(user_data.Scope);
-                    deleteDirectory(user_data.Scope);
+                    unmountDirectory(user.scope);
+                    deleteDirectory(user.scope);
                     console.log(`Successfully removed the user... Username: ${username}`);
                     res.status(200).send({ response: 'Successfully removed the user' });
                 }
