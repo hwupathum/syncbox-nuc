@@ -9,3 +9,12 @@ CREATE TABLE IF NOT EXISTS users (
     scope VARCHAR(255) NOT NULL,
     PRIMARY KEY (userid)
 );
+
+CREATE TABLE IF NOT EXISTS schedules (
+    scheduleId INT NOT NULL AUTO_INCREMENT,
+    username VARCHAR(50) NOT NULL,
+    filename VARCHAR(255) NOT NULL,
+    startDate VARCHAR(20) NOT NULL,
+    startTime VARCHAR(10) NOT NULL,
+    PRIMARY KEY (scheduleId)
+);
