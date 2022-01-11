@@ -9,14 +9,13 @@ import createConfig from './seafile_utils/createConfig';
 import getToken from './seafile_utils/getToken';
 import path from 'path';
 import fs from 'fs';
-import cron from 'node-cron';
 import unmountDirectory from './system_utils/unmountDirectory';
-import { getUser, deleteUser, getAllSchedulers, deleteScheduler } from './system_utils/redis';
+import { getUser, deleteUser } from './system_utils/redis';
 import { addNewUser, getUserByUsername, updateUserPasswordByUsername } from './database/user_repository';
 import deleteDirectory from './system_utils/deleteDirectory';
 import { ExecException } from 'child_process';
 import { comparePassword, hashPassword } from './security/bcrypt';
-import { mountDirectoriesForSavedUsers } from './system_utils/start';
+import { dowloadScheduledFiles, mountDirectoriesForSavedUsers } from './system_utils/start';
 import { createNewSchedule } from './database/schedule_repository';
 
 require('dotenv').config();
@@ -31,7 +30,6 @@ const host_ip = process.env.HOST_IP_ADDRESS ?? '172.17.0.1';
 const seafile_host = process.env.SEAFILE_HOST ?? 'http://www.nextbox.lk:81';
 const server_port = process.env.SERVER_PORT ?? 1901;
 const base_directory = process.env.VIRTUAL_DRIVE_CONTAINER_DIRECTORY ?? '/home/melangakasun/Desktop/FYP/test';
-const config_file_location = 'auth-config.yaml';
 
 const app = express();
 app.use(cors({
@@ -346,38 +344,6 @@ app.listen(server_port, () => {
     mountDirectoriesForSavedUsers(base_directory);
     dowloadScheduledFiles();
 });
-
-function dowloadScheduledFiles() {
-    cron.schedule('* * * * *', () => {
-        getAllSchedulers((schedulers: { [s: string]: string; }) => {
-            let current = new Date();
-            let time = current.toTimeString().substring(0, 5);
-            for (let [filename, file_data] of Object.entries(schedulers)) {
-                try {
-                    let scheduled_file = JSON.parse(file_data);
-                    if (current.toLocaleDateString() == scheduled_file.date && time >= scheduled_file.time) {
-                        console.log('Date Matched !', time, scheduled_file);
-                        deleteScheduler(filename);
-                        if (fs.existsSync(filename)) {
-                            console.log(`Downloading file: ${filename}`);
-                            fs.readFile(filename, 'utf8', (error, data) => {
-                                if (error) {
-                                    console.error(error);
-                                } else if (data) {
-                                    console.log(`Successfully downloaded file: ${filename}`);
-                                }
-                            });
-                        } else {
-                            console.log('File not exists');
-                        }
-                    }
-                } catch (error) {
-                    console.error(error);
-                }
-            }
-        });
-    });
-}
 
 function updateConfigurationFile(file_name: string, new_token: string) {
     try {
