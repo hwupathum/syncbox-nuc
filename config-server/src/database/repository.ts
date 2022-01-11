@@ -5,6 +5,11 @@ export function addNewUser(username: string, password: string, scope: string, ca
     connection.query(sql_query, { username, password, scope }, (error, result, fields) => callback(error, result, fields));
 }
 
+export function getAllUsers(callback: Function) {
+    let sql_query = 'SELECT * FROM users';
+    connection.query(sql_query, (error, result, fields) => callback(error, result, fields));
+}
+
 export function getUserByUsername(username: string, callback: Function) {
     let sql_query = `SELECT * FROM users WHERE username = '${username}'`;
     connection.query(sql_query, (error, result, fields) => callback(error, result, fields));
