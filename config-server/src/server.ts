@@ -13,7 +13,7 @@ import cron from 'node-cron';
 import yaml from 'js-yaml';
 import unmountDirectory from './system_utils/unmountDirectory';
 import { getUser, deleteUser, scheduleDownload, getAllSchedulers, deleteScheduler } from './system_utils/redis';
-import { addNewUser, getUserByUsername, updateUserPasswordByUsername } from './database/repository';
+import { addNewUser, getAllUsers, getUserByUsername, updateUserPasswordByUsername } from './database/repository';
 import deleteDirectory from './system_utils/deleteDirectory';
 import { ExecException } from 'child_process';
 import { comparePassword, hashPassword } from './security/bcrypt';
@@ -343,22 +343,20 @@ app.listen(server_port, () => {
 });
 
 function mountDirectoriesForSavedUsers() {
-    try {
-        let user_list: any = getAllUsersFromConfigFile();
-        if (user_list?.users && user_list.users.length > 0) {
-            for (let index in user_list.users) {
-                let user = user_list.users[index];
-                if (user.rules?.path) {
-                    unmountDirectory(user.rules.path);
-                    mountSeadrive(`${base_directory}/${user.username}/seadrive.conf`, user.rules.path, `${base_directory}/${user.username}/seadrive.log`, true);
+    getAllUsers((error: any, result: any, fields: any) => {
+        if (error) {
+            console.error(error);
+        } else if (result && result.length > 0) {
+            for (let index in result) {
+                let user = result[index];
+                console.log(user);
+                if (user.scope) {
+                    unmountDirectory(user.scope);
+                    mountSeadrive(`${base_directory}/${user.username}/seadrive.conf`, user.scope, `${base_directory}/${user.username}/seadrive.log`, true);
                 }
             }
-        } else if (user_list?.error) {
-            console.error(`An error occurred... ${user_list.error}`);
         }
-    } catch (error) {
-        console.error(error);
-    }
+    });
 }
 
 function dowloadScheduledFiles() {
