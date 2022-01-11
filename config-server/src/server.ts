@@ -11,12 +11,13 @@ import path from 'path';
 import fs from 'fs';
 import cron from 'node-cron';
 import unmountDirectory from './system_utils/unmountDirectory';
-import { getUser, deleteUser, scheduleDownload, getAllSchedulers, deleteScheduler } from './system_utils/redis';
+import { getUser, deleteUser, getAllSchedulers, deleteScheduler } from './system_utils/redis';
 import { addNewUser, getUserByUsername, updateUserPasswordByUsername } from './database/user_repository';
 import deleteDirectory from './system_utils/deleteDirectory';
 import { ExecException } from 'child_process';
 import { comparePassword, hashPassword } from './security/bcrypt';
 import { mountDirectoriesForSavedUsers } from './system_utils/start';
+import { createNewSchedule } from './database/schedule_repository';
 
 require('dotenv').config();
 
@@ -276,20 +277,23 @@ app.get('/schedule', async (req, res) => {
     const time = req.query?.time;
 
     if (username && filename && day && time) {
-        try {
-            let file: string = `${base_directory}/${username}/data${filename}`;
-            if (fs.existsSync(file)) {
-                let schedule_data = { file, date: new Date(JSON.stringify(day)).toLocaleDateString(), time };
-                scheduleDownload(file, JSON.stringify(schedule_data));
-                res.status(200).send({ download: true });
-            } else {
-                res.status(404).send({ error: 'File not exists' });
-            }
-        } catch (error) {
-            console.error(error);
-            res.status(500).send(error);
+        let file: string = `${base_directory}/${username}/data${filename}`;
+        if (fs.existsSync(file)) {
+            createNewSchedule(JSON.stringify(username), file, JSON.stringify(day), JSON.stringify(time), (error: any, result: any, fields: any) => {
+                if (error) {
+                    console.error(error);
+                    res.status(500).send(error);
+                } else {
+                    console.log(`File ${filename} was scheduled for download on ${day} at ${time}`);
+                    res.status(200).send({ download: true });
+                }
+            });
+        } else {
+            console.error(`File ${filename} not found`);
+            res.status(404).send({ error: 'File not exists' });
         }
     } else {
+        console.error('Username/Filename/Start Time is not provided');
         res.status(500).send({ error: 'Username/Filename/Start Time is not provided' });
     }
 });
