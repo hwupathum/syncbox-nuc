@@ -10,13 +10,13 @@ import getToken from './seafile_utils/getToken';
 import path from 'path';
 import fs from 'fs';
 import cron from 'node-cron';
-import yaml from 'js-yaml';
 import unmountDirectory from './system_utils/unmountDirectory';
 import { getUser, deleteUser, scheduleDownload, getAllSchedulers, deleteScheduler } from './system_utils/redis';
-import { addNewUser, getAllUsers, getUserByUsername, updateUserPasswordByUsername } from './database/repository';
+import { addNewUser, getUserByUsername, updateUserPasswordByUsername } from './database/repository';
 import deleteDirectory from './system_utils/deleteDirectory';
 import { ExecException } from 'child_process';
 import { comparePassword, hashPassword } from './security/bcrypt';
+import { mountDirectoriesForSavedUsers } from './system_utils/start';
 
 require('dotenv').config();
 
@@ -338,26 +338,9 @@ app.delete('/remove', async (req, res) => {
 });
 
 app.listen(server_port, () => {
-    mountDirectoriesForSavedUsers();
+    mountDirectoriesForSavedUsers(base_directory);
     dowloadScheduledFiles();
 });
-
-function mountDirectoriesForSavedUsers() {
-    getAllUsers((error: any, result: any, fields: any) => {
-        if (error) {
-            console.error(error);
-        } else if (result && result.length > 0) {
-            for (let index in result) {
-                let user = result[index];
-                console.log(user);
-                if (user.scope) {
-                    unmountDirectory(user.scope);
-                    mountSeadrive(`${base_directory}/${user.username}/seadrive.conf`, user.scope, `${base_directory}/${user.username}/seadrive.log`, true);
-                }
-            }
-        }
-    });
-}
 
 function dowloadScheduledFiles() {
     cron.schedule('* * * * *', () => {
@@ -389,15 +372,6 @@ function dowloadScheduledFiles() {
             }
         });
     });
-}
-
-function getAllUsersFromConfigFile(): any {
-    try {
-        let data: any = yaml.load(fs.readFileSync(config_file_location, 'utf8'));
-        return { users: data.users ?? [] };
-    } catch (e) {
-        return { error: e }
-    }
 }
 
 function updateConfigurationFile(file_name: string, new_token: string) {
