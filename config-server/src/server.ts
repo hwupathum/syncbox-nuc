@@ -402,23 +402,6 @@ function getAllUsersFromConfigFile(): any {
     }
 }
 
-function getUserFromConfigFile(username: string): any {
-    try {
-        let data: any = yaml.load(fs.readFileSync(config_file_location, 'utf8'));
-        let users = data.users ? data.users : [];
-        for (let i = 0; i < users.length; i++) {
-            let user_object = users[i];
-            if (user_object.username === username) {
-                console.log(`${username} is registered with the SyncBox...`);
-                return { user: user_object };
-            }
-        }
-        return;
-    } catch (e) {
-        return { error: e }
-    }
-}
-
 function updateConfigurationFile(file_name: string, new_token: string) {
     try {
         fs.readFile(file_name, 'utf8', (error, content) => {
