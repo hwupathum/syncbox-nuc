@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(50) NOT NULL,
     password VARCHAR(255) NOT NULL,
     scope VARCHAR(255) NOT NULL,
-    PRIMARY KEY (userid)
+    PRIMARY KEY (user_id)
 );
 
 CREATE TABLE IF NOT EXISTS schedules (
