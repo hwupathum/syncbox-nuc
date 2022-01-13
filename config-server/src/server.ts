@@ -26,7 +26,7 @@ declare module 'express-session' {
 }
 
 const host_ip = process.env.HOST_IP_ADDRESS ?? '172.17.0.1';
-const seafile_host = process.env.SEAFILE_HOST ?? 'http://www.nextbox.lk:81';
+const seafile_url = process.env.SEAFILE_URL ?? 'http://www.nextbox.lk:81';
 const server_port = process.env.SERVER_PORT ?? 1901;
 const base_directory = process.env.VIRTUAL_DRIVE_CONTAINER_DIRECTORY ?? '/home/melangakasun/Desktop/FYP/test';
 
@@ -66,7 +66,7 @@ app.post('/register', (req, res) => {
             res.status(500).send({ error: `User: ${username} is already registered` });
         } else {
             // get access token from server
-            getToken(seafile_host, username, password, (error: ExecException | null, stdout: string, stderr: string) => {
+            getToken(seafile_url, username, password, (error: ExecException | null, stdout: string, stderr: string) => {
                 if (stdout) {
                     let opt: any = JSON.parse(stdout);
                     if (opt.non_field_errors) {
@@ -85,7 +85,7 @@ app.post('/register', (req, res) => {
                         // creating the seadrive.conf file for the user
                         if (!fs.existsSync(`${user_directory}/seadrive.conf`)) {
                             console.log(`Creating the configuration file...`);
-                            createConfig(`${user_directory}/seadrive.conf`, seafile_host, username, opt.token, username);
+                            createConfig(`${user_directory}/seadrive.conf`, seafile_url, username, opt.token, username);
                         }
 
                         // Mounting the directory
@@ -131,7 +131,7 @@ app.post('/login', async (req, res) => {
             let user_data = result[0];
 
             // get access token from server
-            getToken(seafile_host, username, password, (error: ExecException | null, stdout: string, stderr: string) => {
+            getToken(seafile_url, username, password, (error: ExecException | null, stdout: string, stderr: string) => {
                 if (stdout) {
                     let opt: any = JSON.parse(stdout);
                     if (opt.non_field_errors) {
