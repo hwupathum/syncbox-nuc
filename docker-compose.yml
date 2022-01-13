@@ -2,41 +2,40 @@ version: '2.0'
 
 services:
   database:
-      image: mysql:5.7
-      ports:
-          - "3308:3306"
-      command: --init-file /data/application/init.sql
-      volumes:
-          - ./init.sql:/data/application/init.sql
-          - db_data:/var/lib/mysql
-      environment:
-          - MYSQL_ROOT_USER: root
-          - MYSQL_ROOT_PASSWORD: secret
-          - MYSQL_DATABASE: syncbox
+    image: mysql:5.7
+    ports:
+      - "3308:3306"
+    command: --init-file /data/application/init.sql
+    volumes:
+      - ./init.sql:/data/application/init.sql
+      - db_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: syncbox
 
   config-server:
-      image: config-server
-      build:
-        context: ./config-server
-      ports:
-        - "1901:1901"
-      environment:
-        - SERVER_PORT: 1901
-        # seafile configurations
-        - SEAFILE_URL: localhost:7080
-        - SEAFILE_DATA_DIRECTORY: /home/melangakasun/.seadrive/data
-        - VIRTUAL_DRIVE_CONTAINER_DIRECTORY: /home/melangakasun/Desktop/FYP/test
-        # host machine configurations
-        - HOST_IP_ADDRESS: 172.17.0.1
-        - HOST_USERNAME: melangakasun
-        - HOST_PASSWORD: 
-        # database configurations
-        - DATABASE_PORT: 3306
-        - DATABASE_USER: root
-        - DATABASE_PASSWORD: secret
-        - DATABASE_NAME: syncbox
-      links:
-        - database
-        
+    image: config-server
+    build:
+      context: ./config-server
+    ports:
+      - "1901:1901"
+    environment:
+      SERVER_PORT: 1901
+      # seafile configurations
+      SEAFILE_URL: localhost:7080
+      SEAFILE_DATA_DIRECTORY: /home/melangakasun/.seadrive/data
+      VIRTUAL_DRIVE_CONTAINER_DIRECTORY: /home/melangakasun/Desktop/FYP/test
+      # host machine configurations
+      HOST_IP_ADDRESS: 172.17.0.1
+      HOST_USERNAME: melangakasun
+      HOST_PASSWORD: null # database configurations
+      DATABASE_PORT: 3306
+      DATABASE_USER: root
+      DATABASE_PASSWORD: secret
+      DATABASE_NAME: syncbox
+    links:
+      - database
+
 volumes:
-    db_data:
+  db_data: null
