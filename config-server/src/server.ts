@@ -272,16 +272,16 @@ app.get('/schedule', async (req, res) => {
     const filename = req.query?.filename;
     const day = req.query?.day;
     const time = req.query?.time;
-
+    
     if (username && filename && day && time) {
         let file: string = `${base_directory}/${username}/data${filename}`;
         if (fs.existsSync(file)) {
-            createNewSchedule(JSON.stringify(username), file, JSON.stringify(day), JSON.stringify(time), (error: any, result: any, fields: any) => {
+            createNewSchedule(JSON.stringify(username), file, `${day} ${time}:00`, (error: any, result: any, fields: any) => {
                 if (error) {
                     console.error(error);
                     res.status(500).send(error);
                 } else {
-                    console.log(`File ${filename} was scheduled for download on ${day} at ${time}`);
+                    console.log(`File ${file} was scheduled for download on ${day} at ${time}`);
                     res.status(200).send({ download: true });
                 }
             });
