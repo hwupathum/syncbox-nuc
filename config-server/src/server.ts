@@ -29,7 +29,7 @@ const base_directory = process.env.VIRTUAL_DRIVE_CONTAINER_DIRECTORY ?? '/home/m
 
 const app = express();
 app.use(cors({
-    origin: 'http://web-interface:3000',
+    origin: ['web-interface:3000', 'http://localhost:3000'],
     credentials: true,
 }));
 app.use(cookieParser());
