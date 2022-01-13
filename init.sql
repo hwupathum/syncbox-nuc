@@ -25,7 +25,9 @@ CREATE TABLE IF NOT EXISTS logs (
     filename VARCHAR(255) NOT NULL,
     path TEXT NOT NULL,
     extension VARCHAR(5) NOT NULL,
-    acess_time DATETIME DEFAULT GETDATE() NOT NULL,
+    acess_time DATETIME NOT NULL,
+    mod_time DATETIME NOT NULL,
+    size INT NOT NULL,
     PRIMARY KEY (log_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
