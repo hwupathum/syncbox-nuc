@@ -23,14 +23,13 @@ declare module 'express-session' {
     }
 }
 
-const host_ip = process.env.HOST_IP_ADDRESS ?? '172.17.0.1';
 const seafile_url = process.env.SEAFILE_URL ?? 'http://www.nextbox.lk:81';
 const server_port = process.env.SERVER_PORT ?? 1901;
 const base_directory = process.env.VIRTUAL_DRIVE_CONTAINER_DIRECTORY ?? '/home/melangakasun/Desktop/FYP/test';
 
 const app = express();
 app.use(cors({
-    origin: [`http://${host_ip}:3000`, `http://${host_ip}:3001`],
+    origin: 'http://web-interface:3000',
     credentials: true,
 }));
 app.use(cookieParser());
