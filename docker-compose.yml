@@ -38,5 +38,14 @@ services:
     links:
       - database
 
+  web-interface:
+    image: web-interface
+    build: 
+      context: ./web-interface
+    ports:
+      - "3000:3000"
+    links:
+      - config-server
+
 volumes:
   db_data: null
