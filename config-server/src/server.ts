@@ -17,8 +17,6 @@ import { comparePassword, hashPassword } from './security/bcrypt';
 import { dowloadScheduledFiles, mountDirectoriesForSavedUsers } from './system_utils/start';
 import { createNewSchedule } from './database/schedule_repository';
 
-require('dotenv').config();
-
 declare module 'express-session' {
     export interface SessionData {
         user: { [key: string]: any };

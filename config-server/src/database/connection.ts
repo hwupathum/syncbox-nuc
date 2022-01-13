@@ -1,8 +1,6 @@
 import mysql from 'mysql';
 
-require('dotenv').config();
-
-const host = 'http://database';
+const host = 'database';
 const port = process.env.DATABASE_PORT ? parseInt(process.env.DATABASE_PORT) : 3308;
 const user = process.env.DATABASE_USER ?? 'root'
 const password = process.env.DATABASE_PASSWORD ?? 'secret';

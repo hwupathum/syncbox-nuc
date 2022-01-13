@@ -1,5 +1,3 @@
-require('dotenv').config();
-
 const SSH = require('simple-ssh');
 const ssh = new SSH({ host: `${process.env.HOST_IP_ADDRESS}`, user: `${process.env.HOST_USERNAME}`, pass: `${process.env.HOST_PASSWORD}` });
 const data_directory = process.env.SEAFILE_DATA_DIRECTORY ?? '~/.seadrive/data';
