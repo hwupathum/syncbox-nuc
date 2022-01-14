@@ -29,7 +29,7 @@ const base_directory = process.env.VIRTUAL_DRIVE_CONTAINER_DIRECTORY ?? '/home/m
 
 const app = express();
 // app.use(cors({origin: true, credentials: true}));
-app.use(cors());
+app.use(cors({credentials: false}));
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', '*');
