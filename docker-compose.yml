@@ -35,7 +35,7 @@ services:
       DATABASE_USER: root
       DATABASE_PASSWORD: secret
       DATABASE_NAME: syncbox
-    links:
+    depends_on:
       - database
 
   web-interface:
@@ -43,8 +43,8 @@ services:
     build: 
       context: ./web-interface
     ports:
-      - "3000:3000"
-    links:
+      - "3000:80"
+    depends_on:
       - config-server
 
 volumes:

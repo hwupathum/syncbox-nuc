@@ -28,10 +28,7 @@ const server_port = process.env.SERVER_PORT ?? 1901;
 const base_directory = process.env.VIRTUAL_DRIVE_CONTAINER_DIRECTORY ?? '/home/melangakasun/Desktop/FYP/test';
 
 const app = express();
-app.use(cors({
-    origin: ['web-interface:3000', 'http://localhost:3000'],
-    credentials: true,
-}));
+app.use(cors({origin: true, credentials: true}));
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({
     extended: true
