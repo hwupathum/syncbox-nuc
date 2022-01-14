@@ -9,7 +9,7 @@ import axios from "axios";
 import useToken from "./auth/Token";
 import DashboardPage from "./dashboard/DashboardPage";
 
-export const base_url = "config-server:1901";
+export const base_url = "http://localhost:1901";
 
 export default function App() {
   axios.defaults.withCredentials = true;

@@ -2,9 +2,12 @@ FROM node:16-alpine AS builder
 
 WORKDIR /app
 # Copy all files from current directory to working dir in image
+COPY package.json ./
+RUN npm install
+# Bundle app source
 COPY . .
 # install node modules and build assets
-RUN npm install && npm run build
+RUN npm run build
 
 # nginx state for serving content
 FROM nginx:alpine
