@@ -28,7 +28,15 @@ const server_port = process.env.SERVER_PORT ?? 1901;
 const base_directory = process.env.VIRTUAL_DRIVE_CONTAINER_DIRECTORY ?? '/home/melangakasun/Desktop/FYP/test';
 
 const app = express();
-app.use(cors({origin: true, credentials: true}));
+// app.use(cors({origin: true, credentials: true}));
+app.use(cors());
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', '*');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+    next();
+});
+
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({
     extended: true
