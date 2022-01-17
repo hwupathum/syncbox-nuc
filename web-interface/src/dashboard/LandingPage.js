@@ -7,13 +7,14 @@ import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import PersonOutlineIcon  from '@mui/icons-material/PersonOutline';
+import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 import TextField from '@mui/material/TextField';
-import { base_url } from './App';
+import { base_url } from '../App';
 import { useHistory, useLocation } from 'react-router-dom';
+import Objectives from '../Objectives';
 
-const Landing = ({ setToken }) => {
+const LandingPage = ({ setToken }) => {
     let history = useHistory();
     let location = useLocation();
     let { from } = location.state || { from: { pathname: "/data/" } };
@@ -22,23 +23,23 @@ const Landing = ({ setToken }) => {
     let [password, setPassword] = React.useState();
     let [error, setError] = React.useState();
 
-    const handleSubmit = async e => {
+    const handleSubmit = e => {
         e.preventDefault();
         setError('');
         console.log(username, password);
-        const response = await axios.post(isLogin ? `${base_url}/login` : `${base_url}/register`, { username, password })
+        axios.post(isLogin ? `${base_url}/login` : `${base_url}/register`, { username, password })
             .then(response => {
                 setToken({ token: response.data, user: username });
                 history.replace(from);
             })
             .catch(error => {
                 console.error(error);
-                setError(error);
+                setError(error.message);
             });
     }
 
     return (
-        <React.Fragment>
+        <>
             <Paper sx={{
                 position: 'relative',
                 backgroundColor: 'grey.800',
@@ -64,9 +65,10 @@ const Landing = ({ setToken }) => {
                         <Grid item xs={12} sm={8} md={5} component={Paper} elevation={0} square>
                             <Box sx={{ my: 8, mx: 4, display: 'flex', flexDirection: 'column', alignItems: 'center', }} >
                                 <Avatar sx={{ m: 1, bgcolor: 'primary.main' }}>
-                                    {isLogin ? <PersonOutlineIcon  /> : <PersonAddAltIcon  />}
+                                    {isLogin ? <PersonOutlineIcon /> : <PersonAddAltIcon />}
                                 </Avatar>
                                 <Typography component="h1" variant="h5">{isLogin ? "Login" : "Register"}</Typography>
+                                {error ?? <Typography variant="p">{error}</Typography>}
                                 <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
                                     <TextField
                                         margin="normal"
@@ -112,8 +114,10 @@ const Landing = ({ setToken }) => {
                     </Grid>
                 </Grid> */}
             </Paper>
-        </React.Fragment >
+
+            <Objectives />
+        </>
     );
 }
 
-export default Landing;
+export default LandingPage;

@@ -78,7 +78,7 @@ const tiers = [
 
 const Objectives = () => {
     return (
-        <React.Fragment>
+        <>
             <Container maxWidth="md" component="footer" sx={{ borderTop: (theme) => `1px solid ${theme.palette.divider}`, mt: 6, pb: 8 }} />
             <Container disableGutters maxWidth="sm" component="main" sx={{ pb: 6 }}>
                 <Typography component="h1" variant="h2" align="center" color="text.primary" gutterBottom >SyncBox Features</Typography>
@@ -132,7 +132,7 @@ const Objectives = () => {
                 </Grid> */}
             {/* <Copyright sx={{ mt: 5 }} /> */}
             {/* End footer */}
-        </React.Fragment>
+        </>
     );
 }
 

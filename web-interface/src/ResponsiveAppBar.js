@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Link, useHistory } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -12,10 +13,8 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 
-const pages = ['Dashboard'];
-const settings = ['Profile', 'Account', 'Logout'];
-
-const ResponsiveAppBar = () => {
+const ResponsiveAppBar = ({ token, deleteToken }) => {
+    let history = useHistory();
     const [anchorElNav, setAnchorElNav] = React.useState(null);
     const [anchorElUser, setAnchorElUser] = React.useState(null);
 
@@ -33,6 +32,14 @@ const ResponsiveAppBar = () => {
     const handleCloseUserMenu = () => {
         setAnchorElUser(null);
     };
+
+    const logout = () => {
+        deleteToken();
+        history.push("/");
+    }
+
+    const pages = ['Dashboard'];
+    const settings = [{ name: 'Profile', action: null }, { name: 'Account', action: null }, { name: 'Logout', action: logout }];
 
     return (
         <AppBar position="static" elevation={0}>
@@ -66,7 +73,7 @@ const ResponsiveAppBar = () => {
                     <Box sx={{ flexGrow: 0 }}>
                         <Tooltip title="Open settings">
                             <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                                <Avatar alt={token?.user ? token.user : "Remy Sharp"} src="/static/images/avatar/2.jpg" />
                             </IconButton>
                         </Tooltip>
                         <Menu sx={{ mt: '45px' }} id="menu-appbar" anchorEl={anchorElUser} keepMounted open={Boolean(anchorElUser)}
@@ -75,8 +82,11 @@ const ResponsiveAppBar = () => {
                             onClose={handleCloseUserMenu}
                         >
                             {settings.map((setting) => (
-                                <MenuItem key={setting} onClick={handleCloseNavMenu}>
-                                    <Typography textAlign="center">{setting}</Typography>
+                                <MenuItem key={setting.name} onClick={() => {
+                                    handleCloseUserMenu();
+                                    setting.action();
+                                }}>
+                                    <Typography textAlign="center">{setting.name}</Typography>
                                 </MenuItem>
                             ))}
                         </Menu>

@@ -8,8 +8,7 @@ import axios from "axios";
 import useToken from "./auth/Token";
 import DashboardPage from "./dashboard/DashboardPage";
 import ResponsiveAppBar from "./ResponsiveAppBar";
-import Objectives from "./Objectives";
-import Landing from "./Landing";
+import LandingPage from "./dashboard/LandingPage";
 
 export const base_url = "http://localhost:1901";
 
@@ -20,10 +19,7 @@ export default function App() {
   return (
     <Router>
       <div>
-
-      <ResponsiveAppBar />
-      <Landing setToken={saveToken} />
-      <Objectives />
+      <ResponsiveAppBar token={token} deleteToken={deleteToken} />
 
       {/* <Navbar bg="primary" variant="dark">
         <Container>
@@ -37,6 +33,7 @@ export default function App() {
       </Navbar> */}
 
         <Switch>
+          <Route exact path="/"><LandingPage setToken={saveToken} /></Route>
           <Route exact path="/register"><RegisterPage setToken={saveToken} /></Route>
           <Route exact path="/login"><LoginPage setToken={saveToken} /></Route>
           <PrivateRoute path="/data/*"><DashboardPage /></PrivateRoute>
