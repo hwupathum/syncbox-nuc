@@ -14,6 +14,8 @@ COPY . .
 
 RUN tsc
 
+RUN apk --no-cache add curl
+
 EXPOSE 1901
 
 CMD [ "node", "./build/server.js" ] 
