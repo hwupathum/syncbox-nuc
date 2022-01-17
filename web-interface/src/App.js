@@ -2,12 +2,14 @@ import React from "react";
 import { BrowserRouter as Router, Switch, Route, Link, useHistory } from "react-router-dom";
 import LoginPage from "./auth/LoginPage";
 import PrivateRoute from "./auth/PrivateRoute";
-import 'bootstrap/dist/css/bootstrap.min.css';
-import { Button, Container, Nav, Navbar } from "react-bootstrap";
+import Button from '@mui/material/Button';
 import RegisterPage from "./auth/RegisterPage";
 import axios from "axios";
 import useToken from "./auth/Token";
 import DashboardPage from "./dashboard/DashboardPage";
+import ResponsiveAppBar from "./ResponsiveAppBar";
+import Objectives from "./Objectives";
+import Landing from "./Landing";
 
 export const base_url = "http://localhost:1901";
 
@@ -19,7 +21,11 @@ export default function App() {
     <Router>
       <div>
 
-      <Navbar bg="primary" variant="dark">
+      <ResponsiveAppBar />
+      <Landing setToken={saveToken} />
+      <Objectives />
+
+      {/* <Navbar bg="primary" variant="dark">
         <Container>
         <Navbar.Brand href="/data/">SyncBox</Navbar.Brand>
         <Nav className="me-auto">
@@ -28,7 +34,7 @@ export default function App() {
         <Navbar.Text>{token?.user}</Navbar.Text>
         <AuthButton token={token} deleteToken={deleteToken} />
         </Container>
-      </Navbar>
+      </Navbar> */}
 
         <Switch>
           <Route exact path="/register"><RegisterPage setToken={saveToken} /></Route>

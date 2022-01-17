@@ -23,13 +23,13 @@ declare module 'express-session' {
     }
 }
 
-const seafile_url = process.env.SEAFILE_URL ?? 'http://www.nextbox.lk:81';
+const seafile_url = process.env.SEAFILE_URL ?? 'http://www.nextbox.lk:8081';
 const server_port = process.env.SERVER_PORT ?? 1901;
 const base_directory = process.env.VIRTUAL_DRIVE_CONTAINER_DIRECTORY ?? '/home/melangakasun/Desktop/FYP/test';
 
 const app = express();
 // app.use(cors({origin: true, credentials: true}));
-app.use(cors({credentials: true, origin: 'http://localhost'}));
+app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
 
 
 app.use(cookieParser());
@@ -51,7 +51,7 @@ app.use(session({
 app.post('/register', (req, res) => {
     let username: string = req.body.username;
     let password: string = req.body.password;
-    console.log(`Register request... Username: ${username}`);
+    console.log(`Register request... Username: ${username}`);  
 
     getUserByUsername(username, (error: any, result: any, fields: any) => {
         if (error) {
@@ -63,6 +63,7 @@ app.post('/register', (req, res) => {
             res.status(500).send({ error: `User: ${username} is already registered` });
         } else {
             // get access token from server
+            console.log(`Connecting to the server for verify user: ${username}`);
             getToken(seafile_url, username, password, (error: ExecException | null, stdout: string, stderr: string) => {
                 if (stdout) {
                     let opt: any = JSON.parse(stdout);
