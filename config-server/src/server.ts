@@ -29,8 +29,7 @@ const base_directory = process.env.VIRTUAL_DRIVE_CONTAINER_DIRECTORY ?? '/home/m
 
 const app = express();
 // app.use(cors({origin: true, credentials: true}));
-app.use(cors({credentials: true, origin: 'http://localhost:3000'}));
-
+app.use(cors({ credentials: true, origin: 'http://localhost:3000' }));
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({
@@ -51,7 +50,7 @@ app.use(session({
 app.post('/register', (req, res) => {
     let username: string = req.body.username;
     let password: string = req.body.password;
-    console.log(`Register request... Username: ${username}`);  
+    console.log(`Register request... Username: ${username}`);
 
     getUserByUsername(username, (error: any, result: any, fields: any) => {
         if (error) {
@@ -60,7 +59,7 @@ app.post('/register', (req, res) => {
         } else if (result.length > 0) {
             console.log(`Successfully received the user ${username} from the database...`);
             console.error(`User: ${username} is already registered`);
-            res.status(500).send({ error: `User: ${username} is already registered` });
+            res.status(500).send(`User: ${username} is already registered`);
         } else {
             // get access token from server
             console.log(`Connecting to the server for verify user: ${username}`);
@@ -106,10 +105,10 @@ app.post('/register', (req, res) => {
                                 });
                             }
                         });
-                    } else {
-                        console.error(error ? error.message : stderr);
-                        res.status(500).send({ error: error ? error.message : stderr });
                     }
+                } else {
+                    console.error(error ? error.message : stderr);
+                    res.status(500).send({ error: error ? error.message : stderr });
                 }
             });
         }
@@ -270,7 +269,7 @@ app.get('/schedule', async (req, res) => {
     const filename = req.query?.filename;
     const day = req.query?.day;
     const time = req.query?.time;
-    
+
     if (username && filename && day && time) {
         let file: string = `${base_directory}/${username}/data${filename}`;
         if (fs.existsSync(file)) {
