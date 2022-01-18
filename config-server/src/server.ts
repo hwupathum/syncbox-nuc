@@ -132,7 +132,7 @@ app.post('/login', async (req, res) => {
                 if (stdout) {
                     let opt: any = JSON.parse(stdout);
                     if (opt.non_field_errors) {
-                        comparePassword(password, user_data.password, (error: Error | undefined, reply: boolean) => {
+                        comparePassword(user_data.password, password, (error: Error | undefined, reply: boolean) => {
                             if (error) {
                                 console.error(`An error occurred... ${error.message}`);
                                 res.status(500).send({ error: error.message });
@@ -146,15 +146,14 @@ app.post('/login', async (req, res) => {
                             }
                         });
                     } else if (opt.token) {
-                        comparePassword(password, user_data.password, (error: Error | undefined, reply: boolean) => {
-                            if (!reply) {
-                                // update the SyncBox password and configuration file
-                                // saveUserInRedis(username, password, `${base_directory}/${username}/data`);
-                                hashPassword(password, (error: Error | undefined, hash: string) => {
-                                    if (error) {
-                                        console.error(error);
-                                        res.status(500).send({ error: error.message });
-                                    } else {
+                        hashPassword(password, (error: Error | undefined, hash: string) => {
+                            if (error) {
+                                console.error(error);
+                                res.status(500).send({ error: error.message });
+                            } else {
+                                comparePassword(user_data.password, hash, (error: Error | undefined, reply: boolean) => {
+                                    if (!reply) {
+                                        // update the SyncBox password and configuration file
                                         updateUserPasswordByUsername(username, hash, (error: any, result: any, fields: any) => {
                                             if (error) {
                                                 console.error(error);
@@ -163,14 +162,14 @@ app.post('/login', async (req, res) => {
                                                 console.log(`Successfully updated the password of ${username} in the database...`);
                                             }
                                         });
+                                        // updateUserPassword(username, password);
+                                        updateConfigurationFile(`${base_directory}/${username}/seadrive.conf`, opt.token);
                                     }
+                                    console.log(`${username} successfully logged in...`);
+                                    req.session.user = { name: username, token: opt.token };
+                                    res.status(200).send({ token: opt.token });
                                 });
-                                // updateUserPassword(username, password);
-                                updateConfigurationFile(`${base_directory}/${username}/seadrive.conf`, opt.token);
                             }
-                            console.log(`${username} successfully logged in...`);
-                            req.session.user = { name: username, token: opt.token };
-                            res.status(200).send({ token: opt.token });
                         });
                     }
                 } else {
@@ -223,10 +222,11 @@ app.get('/data', async (req, res) => {
                 results.forEach(result => {
                     let name = path.join(user_directory, result);
                     let size = convertBytes(fs.statSync(name).size);
+                    let extension = path.extname(result);
                     if (fs.lstatSync(name).isDirectory()) {
-                        directories.push({ name: result, size });
+                        directories.push({ name: result, size, extension });
                     } else {
-                        files.push({ name: result, size });
+                        files.push({ name: result, size, extension });
                     }
                 });
                 res.status(200).send({ data: { directories, files } });
