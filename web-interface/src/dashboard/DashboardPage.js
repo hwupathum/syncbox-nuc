@@ -1,6 +1,14 @@
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
-import { Accordion, AccordionContext, Card, Col, ListGroup, Row, useAccordionButton, Container } from "react-bootstrap";
+import { useTheme } from '@mui/material/styles';
+import Container from '@mui/material/Container';
+import Table from '@mui/material/Table';
+import TableHead from '@mui/material/TableHead';
+import TableBody from '@mui/material/TableBody';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import Paper from '@mui/material/Paper';
 import { base_url } from "../App";
 import useToken from "../auth/Token";
 import AlertMessage from "./components/AlertMessage";
@@ -78,26 +86,53 @@ export default function DashboardPage() {
         }
     }
 
-    function CustomToggle({ children, eventKey, callback }) {
-        const { activeEventKey } = useContext(AccordionContext);
+    // function CustomToggle({ children, eventKey, callback }) {
+    //     const { activeEventKey } = useContext(AccordionContext);
 
-        const decoratedOnClick = useAccordionButton(eventKey, () => {
-            callback && callback(eventKey);
-        });
+    //     const decoratedOnClick = useAccordionButton(eventKey, () => {
+    //         callback && callback(eventKey);
+    //     });
 
-        const isCurrentEventKey = activeEventKey === eventKey;
+    //     const isCurrentEventKey = activeEventKey === eventKey;
 
-        return <button
-            className={isCurrentEventKey ? "btn btn-sm btn-primary" : 'btn btn-sm btn-secondary'}
-            onClick={decoratedOnClick}
-        >
-            {children}
-        </button>
-    }
+    //     return <button
+    //         className={isCurrentEventKey ? "btn btn-sm btn-primary" : 'btn btn-sm btn-secondary'}
+    //         onClick={decoratedOnClick}
+    //     >
+    //         {children}
+    //     </button>
+    // }
 
     return (
         <div>
-            <Container className="mt-3">
+            <Container maxWidth="md" component="main" sx={{ pt: 6, pb: 6 }}>
+                {showAlert ? (<AlertMessage message={alertContent} show={setShowAlert} variant={alertType} />) : (<></>)}
+                {fileData?.directories?.length > 0 || fileData?.files?.length > 0 ? <TableContainer component={Paper}>
+                    <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell></TableCell>
+                                <TableCell>Name</TableCell>
+                                <TableCell align="right">Size</TableCell>
+                                <TableCell align="right">Last Updated</TableCell>
+                                <TableCell align="right">Synced</TableCell>
+                                <TableCell></TableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {fileData.directories?.map((directory, key) => {
+                                let data = { location, name: directory.name, size: directory.size, type: directory.extension };
+                                return <DirectoryTile key={key} data={data} />
+                            })}
+                            {fileData.files?.map((file, key) => {
+                                let data = { location, name: file.name, size: file.size, type: file.extension };
+                                return <DirectoryTile key={key} data={data} />
+                            })}
+                        </TableBody>
+                    </Table>
+                </TableContainer> : <p>No data found!</p>}
+            </Container>
+            {/* <Container className="mt-3">
                 {showAlert ? (<AlertMessage message={alertContent} show={setShowAlert} variant={alertType} />) : (<></>)}
                 {fileData?.directories?.length > 0 || fileData?.files?.length > 0 ? (<>
                     <ListGroup>
@@ -130,7 +165,7 @@ export default function DashboardPage() {
                 ) : (
                     <p>No data found!</p>
                 )}
-            </Container>
+            </Container> */}
         </div>
     );
 }

@@ -1,8 +1,7 @@
 import React from "react";
-import { BrowserRouter as Router, Switch, Route, Link, useHistory } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import LoginPage from "./auth/LoginPage";
 import PrivateRoute from "./auth/PrivateRoute";
-import Button from '@mui/material/Button';
 import RegisterPage from "./auth/RegisterPage";
 import axios from "axios";
 import useToken from "./auth/Token";
@@ -40,18 +39,5 @@ export default function App() {
         </Switch>
       </div>
     </Router>
-  );
-}
-
-function AuthButton({ token, deleteToken }) {
-  let history = useHistory();
-
-  return token ? (
-    <Button onClick={() => {
-      deleteToken();
-      history.push("/");
-    }}>Logout</Button>
-  ) : (
-    <Link className="btn btn-primary" to="/login">Login</Link>
   );
 }
