@@ -132,7 +132,7 @@ app.post('/login', async (req, res) => {
                 if (stdout) {
                     let opt: any = JSON.parse(stdout);
                     if (opt.non_field_errors) {
-                        comparePassword(user_data.password, password, (error: Error | undefined, reply: boolean) => {
+                        comparePassword(password, user_data.password, (error: Error | undefined, reply: boolean) => {
                             if (error) {
                                 console.error(`An error occurred... ${error.message}`);
                                 res.status(500).send({ error: error.message });
@@ -146,13 +146,14 @@ app.post('/login', async (req, res) => {
                             }
                         });
                     } else if (opt.token) {
-                        hashPassword(password, (error: Error | undefined, hash: string) => {
-                            if (error) {
-                                console.error(error);
-                                res.status(500).send({ error: error.message });
-                            } else {
-                                comparePassword(user_data.password, hash, (error: Error | undefined, reply: boolean) => {
-                                    if (!reply) {
+                        comparePassword(password, user_data.password, (error: Error | undefined, reply: boolean) => {
+                            if (!reply) {
+                                console.log(`Server password of User: ${username} was changed...`);
+                                hashPassword(password, (error: Error | undefined, hash: string) => {
+                                    if (error) {
+                                        console.error(error);
+                                        res.status(500).send({ error: error.message });
+                                    } else {
                                         // update the SyncBox password and configuration file
                                         updateUserPasswordByUsername(username, hash, (error: any, result: any, fields: any) => {
                                             if (error) {
@@ -162,14 +163,13 @@ app.post('/login', async (req, res) => {
                                                 console.log(`Successfully updated the password of ${username} in the database...`);
                                             }
                                         });
-                                        // updateUserPassword(username, password);
                                         updateConfigurationFile(`${base_directory}/${username}/seadrive.conf`, opt.token);
                                     }
-                                    console.log(`${username} successfully logged in...`);
-                                    req.session.user = { name: username, token: opt.token };
-                                    res.status(200).send({ token: opt.token });
                                 });
                             }
+                            console.log(`${username} successfully logged in...`);
+                            req.session.user = { name: username, token: opt.token };
+                            res.status(200).send({ token: opt.token });
                         });
                     }
                 } else {
