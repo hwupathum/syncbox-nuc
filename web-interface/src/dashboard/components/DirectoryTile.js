@@ -36,7 +36,7 @@ export default function DirectoryTile(props) {
         <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }} >
             <TableCell align="right">{getFileTypeIcon(data.type)}</TableCell>
             <TableCell component="th" scope="row">
-                <Link href={`/data/${data.location}/${data.name}`} underline="none">{data.name}</Link>
+                <Link href={data.link ? `/data/${data.location}/${data.name}` : '#'} underline="none">{data.name}</Link>
             </TableCell>
             <TableCell align="right">{data.size}</TableCell>
             <TableCell align="right">{new Date().toLocaleTimeString()}</TableCell>

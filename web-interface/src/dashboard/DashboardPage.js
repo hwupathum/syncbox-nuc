@@ -120,11 +120,11 @@ export default function DashboardPage() {
                         </TableHead>
                         <TableBody>
                             {fileData.directories?.map((directory, key) => {
-                                let data = { location, name: directory.name, size: directory.size, type: directory.extension };
+                                let data = { link: true, location, name: directory.name, size: directory.size, type: directory.extension };
                                 return <DirectoryTile key={key} data={data} />
                             })}
                             {fileData.files?.map((file, key) => {
-                                let data = { location, name: file.name, size: file.size, type: file.extension };
+                                let data = { link: false, location, name: file.name, size: file.size, type: file.extension };
                                 return <DirectoryTile key={key} data={data} submit={handleScheduleDownload} />
                             })}
                         </TableBody>
