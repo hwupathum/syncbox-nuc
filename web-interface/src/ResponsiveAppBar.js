@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useHistory } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
+import Link from '@mui/material/Link';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
@@ -38,7 +39,7 @@ const ResponsiveAppBar = ({ token, deleteToken }) => {
         history.push("/");
     }
 
-    const pages = ['Dashboard'];
+    const pages = [{title: 'Dashboard', path: '/data/'}];
     const settings = [{ name: 'Profile', action: null }, { name: 'Account', action: null }, { name: 'Logout', action: logout }];
 
     return (
@@ -58,8 +59,8 @@ const ResponsiveAppBar = ({ token, deleteToken }) => {
                             onClose={handleCloseNavMenu}
                             sx={{ display: { xs: 'block', md: 'none' }, }} >
                             {pages.map((page) => (
-                                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                                    <Typography textAlign="center">{page}</Typography>
+                                <MenuItem key={page.title} onClick={handleCloseNavMenu}>
+                                    <Link textAlign="center" href={page.path} underline="none" >{page.title}</Link>
                                 </MenuItem>
                             ))}
                         </Menu>
@@ -67,7 +68,9 @@ const ResponsiveAppBar = ({ token, deleteToken }) => {
                     <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }} >SYNCBOX</Typography>
                     <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
                         {pages.map((page) => (
-                            <Button key={page} onClick={handleCloseNavMenu} sx={{ my: 2, color: 'white', display: 'block' }} >{page}</Button>
+                            <Button key={page.title} onClick={handleCloseNavMenu} >
+                                <Link sx={{ my: 2, color: 'white', display: 'block' }} textAlign="center" href={page.path} underline="none" >{page.title}</Link>
+                            </Button>
                         ))}
                     </Box>
                     <Box sx={{ flexGrow: 0 }}>
