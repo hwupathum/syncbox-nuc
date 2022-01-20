@@ -17,6 +17,8 @@ import { comparePassword, hashPassword } from './security/bcrypt';
 import { dowloadScheduledFiles, mountDirectoriesForSavedUsers } from './system_utils/start';
 import { createNewSchedule } from './database/schedule_repository';
 
+require('dotenv').config();
+
 declare module 'express-session' {
     export interface SessionData {
         user: { [key: string]: any };
@@ -264,7 +266,7 @@ app.get('/download', async (req, res) => {
     }
 });
 
-app.get('/schedule', async (req, res) => {
+app.post('/schedule', async (req, res) => {
     const username = req.query?.username;
     const filename = req.query?.filename;
     const day = req.query?.day;
@@ -273,7 +275,7 @@ app.get('/schedule', async (req, res) => {
     if (username && filename && day && time) {
         let file: string = `${base_directory}/${username}/data${filename}`;
         if (fs.existsSync(file)) {
-            createNewSchedule(JSON.stringify(username), file, `${day} ${time}:00`, (error: any, result: any, fields: any) => {
+            createNewSchedule(JSON.stringify(username), file, `${day} ${time}`, (error: any, result: any, fields: any) => {
                 if (error) {
                     console.error(error);
                     res.status(500).send(error);
