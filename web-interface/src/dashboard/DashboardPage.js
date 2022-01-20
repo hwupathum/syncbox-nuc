@@ -35,12 +35,11 @@ export default function DashboardPage() {
         }
     }, []);
 
-    const handleScheduleDownload = async (e, filename, startDate, startTime) => {
-        e.preventDefault();
+    const handleScheduleDownload = async (filename, startDate, startTime) => {
         console.log(filename, startDate, startTime);
 
         if (token?.user && filename && startDate && startTime) {
-            return axios.get(`${base_url}/schedule?username=${token.user}&filename=${location}/${filename}&day=${startDate}&time=${startTime}`)
+            return axios.post(`${base_url}/schedule?username=${token.user}&filename=${location}/${filename}&day=${startDate}&time=${startTime}`)
                 .then(response => {
                     setAlertContent(`${filename} is scheduled to download successfully`);
                     setAlertType("success");
@@ -126,7 +125,7 @@ export default function DashboardPage() {
                             })}
                             {fileData.files?.map((file, key) => {
                                 let data = { location, name: file.name, size: file.size, type: file.extension };
-                                return <DirectoryTile key={key} data={data} />
+                                return <DirectoryTile key={key} data={data} submit={handleScheduleDownload} />
                             })}
                         </TableBody>
                     </Table>

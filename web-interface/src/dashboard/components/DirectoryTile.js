@@ -1,12 +1,8 @@
 import { useState } from 'react';
 import Box from '@mui/material/Box';
 import Collapse from '@mui/material/Collapse';
-import Table from '@mui/material/Table';
-import TableHead from '@mui/material/TableHead';
-import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableRow from '@mui/material/TableRow';
-import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import IconButton from '@mui/material/IconButton';
 import DownloadIcon from '@mui/icons-material/Download';
@@ -17,10 +13,24 @@ import MusicNoteIcon from '@mui/icons-material/MusicNote';
 import ArticleIcon from '@mui/icons-material/Article';
 import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
+import LocalizationProvider from '@mui/lab/LocalizationProvider';
+import AdapterDateFns from '@mui/lab/AdapterDateFns';
+import TextField from '@mui/material/TextField';
+import DesktopDatePicker from '@mui/lab/DesktopDatePicker';
+import TimePicker from '@mui/lab/TimePicker';
 
 export default function DirectoryTile(props) {
-    let { data } = props;
+    let { data, submit } = props;
     const [open, setOpen] = useState(false);
+    const [date, setDate] = useState(new Date('2014-08-18T00:00:00'));
+    const [time, setTime] = useState(new Date('2014-08-18T00:00:00'));
+
+    const handleSubmit = e => {
+        e.preventDefault();
+        submit(data.name, date.toISOString().split('T')[0], time.toTimeString().split(' ')[0]);
+    }
 
     return (<>
         <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }} >
@@ -38,25 +48,28 @@ export default function DirectoryTile(props) {
             </TableCell>
         </TableRow>
         <TableRow>
-            <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
+            <TableCell style={{ paddingBottom: 6, paddingTop: 4 }} colSpan={6}>
                 <Collapse in={open} timeout="auto" unmountOnExit>
-                    <Box sx={{ margin: 1 }}>
-                        <Typography variant="h6" gutterBottom component="div">
-                            History
-                        </Typography>
-                        <Table size="small" aria-label="purchases">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Date</TableCell>
-                                    <TableCell>Customer</TableCell>
-                                    <TableCell align="right">Amount</TableCell>
-                                    <TableCell align="right">Total price ($)</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                Hi
-                            </TableBody>
-                        </Table>
+                    <Box component="form" noValidate onSubmit={handleSubmit} sx={{ margin: 1 }}>
+                        <Stack direction="row" spacing={8} justifyContent="center" alignItems="center" >
+                            {/* <Typography variant="p" component="div">Select Date and Time</Typography> */}
+                            <LocalizationProvider dateAdapter={AdapterDateFns}>
+                                <DesktopDatePicker
+                                    label="Select Date"
+                                    inputFormat="MM/dd/yyyy"
+                                    value={date}
+                                    onChange={(value) => setDate(value)}
+                                    renderInput={(params) => <TextField {...params} />}
+                                />
+                                <TimePicker
+                                    label="Select Time (Optional)"
+                                    value={time}
+                                    onChange={(value) => setTime(value)}
+                                    renderInput={(params) => <TextField {...params} />}
+                                />
+                            </LocalizationProvider>
+                            <Button type="submit" size="small" variant="contained" endIcon={<DownloadIcon />}>Schedule</Button>
+                        </Stack>
                     </Box>
                 </Collapse>
             </TableCell>
