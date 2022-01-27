@@ -275,17 +275,15 @@ app.post('/schedule', async (req, res) => {
     const time = req.query?.time;
 
     if (username && filename && day && time) {
-        let file: string = `${base_directory}/${username}/data${filename}`;
-        if (fs.existsSync(file)) {
-            createNewSchedule(JSON.stringify(username), file, `${day} ${time}`, (error: any, result: any, fields: any) => {
-                if (error) {
-                    console.error(error);
-                    res.status(500).send(error);
-                } else {
-                    console.log(`File ${file} was scheduled for download on ${day} at ${time}`);
-                    res.status(200).send({ download: true });
-                }
-            });
+        let path: string = `${base_directory}/${username}/data${filename}`;
+        if (fs.existsSync(path)) {
+            const { error, result } = scheduleAllFilesInDirectory(JSON.stringify(username), path, `${day} ${time}`);
+            if (error) {
+                console.error(error);
+                res.status(500).send(error);
+            } else {
+                res.status(200).send({ download: true });
+            }
         } else {
             console.error(`File ${filename} not found`);
             res.status(404).send({ error: 'File not exists' });
@@ -295,6 +293,24 @@ app.post('/schedule', async (req, res) => {
         res.status(500).send({ error: 'Username/Filename/Start Time is not provided' });
     }
 });
+
+const scheduleAllFilesInDirectory = (username: string, path: string, time_string: string) => {
+    if (fs.lstatSync(path).isDirectory()) {
+        fs.readdirSync(path).forEach(file => {
+            let new_path: string = `${path}/${file}`;
+            scheduleAllFilesInDirectory(username, new_path, time_string);
+        });
+    } else {
+        createNewSchedule(username, path, time_string, (error: any, result: any, fields: any) => {
+            if (error) {
+                return { error, result: null };
+            } else {
+                console.log(`File ${path} was scheduled for download on ${time_string}`);
+            }
+        });
+    }
+    return { error: null, result: true };
+}
 
 const convertBytes = (bytes: number) => {
     const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
