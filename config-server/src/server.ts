@@ -39,6 +39,8 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(bodyParser.json());
 
+process.title = 'syncbox-config-server';
+
 app.use(session({
     name: 'username',
     cookie: {
@@ -339,6 +341,7 @@ app.delete('/remove', async (req, res) => {
 });
 
 app.listen(server_port, () => {
+    console.log(`The server is startied with the PID: ${process.pid} on port: ${server_port}...`);
     mountDirectoriesForSavedUsers(base_directory);
     dowloadScheduledFiles();
 });
