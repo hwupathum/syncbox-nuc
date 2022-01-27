@@ -1,6 +1,5 @@
 import axios from "axios";
-import { useContext, useEffect, useState } from "react";
-import { useTheme } from '@mui/material/styles';
+import { useEffect, useState } from "react";
 import Container from '@mui/material/Container';
 import Table from '@mui/material/Table';
 import TableHead from '@mui/material/TableHead';
@@ -13,7 +12,6 @@ import { base_url } from "../App";
 import useToken from "../auth/Token";
 import AlertMessage from "./components/AlertMessage";
 import DirectoryTile from "./components/DirectoryTile";
-import FileTile from "./components/FileTile";
 
 export default function DashboardPage() {
     const [fileData, setFileData] = useState({});
@@ -121,7 +119,7 @@ export default function DashboardPage() {
                         <TableBody>
                             {fileData.directories?.map((directory, key) => {
                                 let data = { link: true, location, name: directory.name, size: directory.size, type: directory.extension };
-                                return <DirectoryTile key={key} data={data} />
+                                return <DirectoryTile key={key} data={data} submit={handleScheduleDownload} />
                             })}
                             {fileData.files?.map((file, key) => {
                                 let data = { link: false, location, name: file.name, size: file.size, type: file.extension };
