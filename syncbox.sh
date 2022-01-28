@@ -10,5 +10,4 @@ start_web_interface() {
     npm start;
 }
 
-sleep 60;
 start_config_server & start_web_interface;
