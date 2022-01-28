@@ -50,9 +50,8 @@ const LandingPage = ({ setToken }) => {
                 backgroundPosition: 'center',
                 backgroundImage: 'url(https://crazylogy.com/wp-content/uploads/2021/09/Cloud-Security-Everything-You-Need-To-Know--1020x600.jpeg)',
             }} >
-                {<img style={{ display: 'none' }} src='https://crazylogy.com/wp-content/uploads/2021/09/Cloud-Security-Everything-You-Need-To-Know--1020x600.jpeg' alt='landing-image' />}
                 <Container maxWidth="md" component="main" elevation={2}>
-                    <Grid container component="main" sx={{ height: '75vh' }} sx={{ pt: 6, pb: 6 }} >
+                    <Grid container component="main" sx={{ height: '75vh', pt: 6, pb: 6 }} >
                         <Grid item xs={false} sm={4} md={7}
                             sx={{
                                 backgroundImage: 'url(https://b.cloudcomputing.id/images/52e30b8a-22f0-483d-b9d1-de171e4899ca/cyber-security-lm-min.jpg)',
