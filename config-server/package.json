@@ -5,7 +5,7 @@
   "main": "src/server.ts",
   "scripts": {
     "build": "rm -rf build/ && prettier --write src/ && tsc",
-    "start": "tsc src/server.ts",
+    "start": "npm run build && node build/server.js",
     "start:dev": "tsc && nodemon src/server.ts "
   },
   "author": "MelangaK97",
