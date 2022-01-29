@@ -178,7 +178,7 @@ app.post('/login', async (req, res) => {
                     }
                 } else {
                     // cannot connect to the server
-                    console.error(error?.message);
+                    console.log('Unable to connect to the server...');
                     comparePassword(password, user_data.password, (error: Error | undefined, reply: boolean) => {
                         if (error) {
                             console.error(`An error occurred... ${error.message}`);
@@ -382,12 +382,11 @@ function updateConfigurationFile(file_name: string, new_token: string) {
 }
 
 function getTokenFromConfigFile(username: string): any {
-    fs.readFile(`${base_directory}/${username}/seadrive.conf`, 'utf8', (error, data) => {
-        if (error) {
-            console.error(error);
-            return { error: 'Unable to access the configuration file' };
-        } else if (data) {
-            return { token: data.split('\n')[3].substring(8) };
-        }
-    });
+    try {
+        let data = fs.readFileSync(`${base_directory}/${username}/seadrive.conf`, 'utf8');
+        return { error: null, token: data.split('\n')[3].substring(8) };
+    } catch (error) {
+        console.error(error);
+        return { error: 'Unable to access the configuration file', token: null };
+    }
 }
