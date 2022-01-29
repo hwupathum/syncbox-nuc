@@ -19,6 +19,14 @@ CREATE TABLE IF NOT EXISTS schedules (
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
+CREATE TABLE IF NOT EXISTS files (
+    user_id INT NOT NULL,
+    full_path TEXT NOT NULL,
+    access_time DATETIME NOT NULL,
+    PRIMARY KEY (user_id, full_path),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
 CREATE TABLE IF NOT EXISTS logs (
     log_id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
