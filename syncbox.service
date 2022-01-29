@@ -3,7 +3,7 @@ Description=SyncBox, A combination of the Config-Server, Web-Interface and Webda
 After=network.target remote-fs.target nss-lookup.target httpd-init.service
 
 [Service]
-ExecStartPre=/bin/bash -c "while [ -f /home/melangakasun/.seadrive/data ]; do sleep 10; done"
+ExecStartPre=/bin/bash -c "while [ -f /home/$USER/.seadrive/data ]; do sleep 10; done"
 ExecStart=/bin/bash /usr/bin/syncbox.sh
 RestartSec=60
 Restart=on-failure

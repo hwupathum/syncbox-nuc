@@ -27,7 +27,7 @@ declare module 'express-session' {
 
 const seafile_url = process.env.SEAFILE_URL ?? 'http://www.nextbox.lk:8081';
 const server_port = process.env.SERVER_PORT ?? 1901;
-const base_directory = process.env.VIRTUAL_DRIVE_CONTAINER_DIRECTORY ?? '/home/melangakasun/Desktop/FYP/test';
+const base_directory = `/home/${process.env.USER}/FYP`; 
 
 const app = express();
 // app.use(cors({origin: true, credentials: true}));
