@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Alert } from "react-bootstrap";
+import Alert from '@mui/material/Alert';
 
 export default function AlertMessage({ message, show, variant }) {
 
@@ -9,6 +9,6 @@ export default function AlertMessage({ message, show, variant }) {
     }, []);
 
     return (
-        <Alert variant={variant} onClose={() => show(false)} dismissible >{message}</Alert>
+        <Alert severity={variant} onClose={() => show(false)} dismissible >{message}</Alert>
     )
 }
