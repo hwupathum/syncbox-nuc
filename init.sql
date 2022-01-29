@@ -21,9 +21,10 @@ CREATE TABLE IF NOT EXISTS schedules (
 
 CREATE TABLE IF NOT EXISTS files (
     user_id INT NOT NULL,
+    path_hash CHAR(32) NOT NULL,
     full_path TEXT NOT NULL,
     access_time DATETIME NOT NULL,
-    PRIMARY KEY (user_id, full_path),
+    PRIMARY KEY (user_id, path_hash),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
