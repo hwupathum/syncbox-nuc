@@ -1,5 +1,5 @@
 var exec = require('child_process').exec;
-const data_directory = `/home/${process.env.USER}/.seadrive/data`; 
+const data_directory = `/home/${require("os").userInfo().username}/.seadrive/data`; 
 
 export default function mountSeadrive(config: string, virtualDriveDir: string, logFile?: string, isForeground?: boolean) {
     console.log(`Mounting seadrive to ${virtualDriveDir}...`);
