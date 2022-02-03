@@ -245,10 +245,9 @@ app.get('/data', async (req, res) => {
                             files.forEach((file: any) => {
                                 let index = result_names.indexOf(`${location}/${file.name}`);
                                 if (index > -1) {
-                                    file.access_time = results[index].access_time;
-                                } else {
-                                    file.access_time = 'N/A';
-                                }
+                                    file.access_time = results[index].access_time || 'N/A';
+                                    file.synced_time = results[index].synced_time || 'N/A';
+                                } 
                             });
                         }
                         res.status(200).send({ data: { directories, files } });
