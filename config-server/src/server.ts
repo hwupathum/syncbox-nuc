@@ -299,7 +299,7 @@ app.post('/schedule', async (req, res) => {
     if (username && filename && day && time) {
         let path: string = `${base_directory}/${username}/data${filename}`;
         if (fs.existsSync(path)) {
-            const { error, result } = scheduleAllFilesInDirectory(JSON.stringify(username), path, `${day} ${time}`);
+            const { error, result } = scheduleAllFilesInDirectory(username, filename, `${day} ${time}`);
             if (error) {
                 console.error(error);
                 res.status(500).send(error);
@@ -316,22 +316,26 @@ app.post('/schedule', async (req, res) => {
     }
 });
 
-const scheduleAllFilesInDirectory = (username: string, path: string, time_string: string) => {
-    if (fs.lstatSync(path).isDirectory()) {
-        fs.readdirSync(path).forEach(file => {
-            let new_path: string = `${path}/${file}`;
-            scheduleAllFilesInDirectory(username, new_path, time_string);
-        });
-    } else {
-        createNewSchedule(username, path, time_string, (error: any, result: any, fields: any) => {
-            if (error) {
-                return { error, result: null };
-            } else {
-                console.log(`File ${path} was scheduled for download on ${time_string}`);
-            }
-        });
+const scheduleAllFilesInDirectory = (username: any, filename: any, time_string: string) => {
+    try {
+        if (fs.lstatSync(`${base_directory}/${username}/data${filename}`).isDirectory()) {
+            fs.readdirSync(`${base_directory}/${username}/data${filename}`).forEach(file => {
+                let new_path: string = `/${filename}/${file}`;
+                scheduleAllFilesInDirectory(username, new_path, time_string);
+            });
+        } else {
+            createNewSchedule(username, filename, time_string, (error: any, result: any, fields: any) => {  
+                if (error) {
+                    return { error, result: null };
+                } else {
+                    console.log(`File ${filename} of ${username} was scheduled for download on ${time_string}`);
+                }
+            });
+        }
+        return { error: null, result: true };
+    } catch (error) {
+        return { error, result: null };
     }
-    return { error: null, result: true };
 }
 
 const convertBytes = (bytes: number) => {
@@ -381,7 +385,7 @@ app.delete('/remove', async (req, res) => {
 app.listen(server_port, () => {
     console.log(`The server is startied with the PID: ${process.pid} on port: ${server_port}...`);
     mountDirectoriesForSavedUsers(base_directory);
-    dowloadScheduledFiles();
+    dowloadScheduledFiles(base_directory);
 });
 
 function updateConfigurationFile(file_name: string, new_token: string) {

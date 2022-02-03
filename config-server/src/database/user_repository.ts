@@ -10,6 +10,11 @@ export function getAllUsers(callback: Function) {
     connection.query(sql_query, (error, result, fields) => callback(error, result, fields));
 }
 
+export function getUserByUserId(user_id: number, callback: Function) {
+    let sql_query = `SELECT * FROM users WHERE user_id = ${user_id}`;
+    connection.query(sql_query, (error, result, fields) => callback(error, result, fields));
+}
+
 export function getUserByUsername(username: string, callback: Function) {
     let sql_query = `SELECT * FROM users WHERE username = '${username}'`;
     connection.query(sql_query, (error, result, fields) => callback(error, result, fields));

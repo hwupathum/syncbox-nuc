@@ -1,7 +1,7 @@
 import connection from "./connection";
 
 export function createNewSchedule(username: string, path: string, time: string, callback: Function) {
-    let sql_query = `INSERT INTO schedules (user_id, full_path, start_time) VALUES ((SELECT user_id FROM users WHERE username = ${username}), '${path}', '${time}')`;
+    let sql_query = `INSERT INTO schedules (user_id, full_path, start_time) VALUES ((SELECT user_id FROM users WHERE username = '${username}'), '${path}', '${time}')`;
     connection.query(sql_query, (error, result, fields) => callback(error, result, fields));
 }
 
