@@ -39,7 +39,7 @@ export default function DirectoryTile(props) {
                 <Link href={data.link ? `/data/${data.location}/${data.name}` : '#'} underline="none">{data.name}</Link>
             </TableCell>
             <TableCell align="right">{data.size}</TableCell>
-            <TableCell align="right">{new Date().toLocaleTimeString()}</TableCell>
+            <TableCell align="right">{data.last_updated}</TableCell>
             <TableCell align="right">{new Date().toLocaleTimeString()}</TableCell>
             <TableCell align="center">
                 <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)} >

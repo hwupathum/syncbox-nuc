@@ -81,7 +81,7 @@ export default function DashboardPage() {
                                 return <DirectoryTile key={key} data={data} submit={handleScheduleDownload} />
                             })}
                             {fileData.files?.map((file, key) => {
-                                let data = { link: false, location, name: file.name, size: file.size, type: file.extension };
+                                let data = { link: false, location, name: file.name, size: file.size, type: file.extension, last_updated: file.access_time };
                                 return <DirectoryTile key={key} data={data} submit={handleScheduleDownload} />
                             })}
                         </TableBody>
