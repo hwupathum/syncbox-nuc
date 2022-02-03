@@ -16,6 +16,7 @@ import { ExecException } from 'child_process';
 import { comparePassword, hashPassword } from './security/bcrypt';
 import { dowloadScheduledFiles, mountDirectoriesForSavedUsers } from './system_utils/start';
 import { createNewSchedule } from './database/schedule_repository';
+import { getFilesByUserId } from './database/file_repository';
 
 require('dotenv').config();
 
@@ -27,7 +28,7 @@ declare module 'express-session' {
 
 const seafile_url = process.env.SEAFILE_URL ?? 'http://www.nextbox.lk:8081';
 const server_port = process.env.SERVER_PORT ?? 1901;
-const base_directory = '/srv/syncbox'; 
+const base_directory = '/srv/syncbox';
 
 const app = express();
 // app.use(cors({origin: true, credentials: true}));
@@ -223,6 +224,7 @@ app.get('/data', async (req, res) => {
             } else if (results) {
                 const directories: any = [];
                 const files: any = [];
+                let file_names: string = '';
                 results.forEach(result => {
                     let name = path.join(user_directory, result);
                     let size = convertBytes(fs.statSync(name).size);
@@ -231,9 +233,29 @@ app.get('/data', async (req, res) => {
                         directories.push({ name: result, size, extension });
                     } else {
                         files.push({ name: result, size, extension });
+                        file_names += `'${location}/${result}', `;
                     }
                 });
-                res.status(200).send({ data: { directories, files } });
+
+                if (files.length > 0) {
+                    getFilesByUserId(username, file_names.slice(0, -2), (error: any, results: any, fields: any) => {
+                        if (results && results.length > 0) {
+                            const result_names = results.map((result: any) => result.full_path);
+
+                            files.forEach((file: any) => {
+                                let index = result_names.indexOf(`${location}/${file.name}`);
+                                if (index > -1) {
+                                    file.access_time = results[index].access_time;
+                                } else {
+                                    file.access_time = 'N/A';
+                                }
+                            });
+                        }
+                        res.status(200).send({ data: { directories, files } });
+                    });
+                } else {
+                    res.status(200).send({ data: { directories, files } });
+                }
             }
         });
     } else {
