@@ -27,7 +27,7 @@ declare module 'express-session' {
 
 const seafile_url = process.env.SEAFILE_URL ?? 'http://www.nextbox.lk:8081';
 const server_port = process.env.SERVER_PORT ?? 1901;
-const base_directory = `/home/${require("os").userInfo().username}/FYP`; 
+const base_directory = '/srv/syncbox'; 
 
 const app = express();
 // app.use(cors({origin: true, credentials: true}));
