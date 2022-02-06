@@ -247,7 +247,7 @@ app.get('/data', async (req, res) => {
                                 if (index > -1) {
                                     file.access_time = results[index].access_time || 'N/A';
                                     file.synced_time = results[index].synced_time || 'N/A';
-                                } 
+                                }
                             });
                         }
                         res.status(200).send({ data: { directories, files } });
@@ -291,23 +291,37 @@ app.get('/download', async (req, res) => {
 
 app.post('/schedule', async (req, res) => {
     const username = req.query?.username;
-    const filename = req.query?.filename;
+    const filenames = req.query?.filename;
     const day = req.query?.day;
     const time = req.query?.time;
 
-    if (username && filename && day && time) {
-        let path: string = `${base_directory}/${username}/data${filename}`;
-        if (fs.existsSync(path)) {
-            const { error, result } = scheduleAllFilesInDirectory(username, filename, `${day} ${time}`);
-            if (error) {
-                console.error(error);
-                res.status(500).send(error);
+    if (username && filenames && day && time) {
+        const splitted_filenames = filenames?.toString().split(', ');
+        let success = [];
+        let err;
+        splitted_filenames.forEach(filename => {
+            console.log(filename);
+            let path: string = `${base_directory}/${username}/data${filename}`;
+            if (fs.existsSync(path)) {
+                const { error, result } = scheduleAllFilesInDirectory(username, filename, `${day} ${time}`);
+                if (error) {
+                    console.error(error);
+                    err = error;
+                } else {
+                    success.push(filename);
+                }
             } else {
-                res.status(200).send({ download: true });
+                console.error(`File ${filename} not found`);
+                err = {error: 'File not exists' };
             }
+        });
+
+        if (splitted_filenames.length === success.length) {
+            res.status(200).send({ download: true });
+        } else if (success.length === 0) {
+            res.status(500).send(err);
         } else {
-            console.error(`File ${filename} not found`);
-            res.status(404).send({ error: 'File not exists' });
+            res.status(200).send({ download: true });
         }
     } else {
         console.error('Username/Filename/Start Time is not provided');
@@ -323,7 +337,7 @@ const scheduleAllFilesInDirectory = (username: any, filename: any, time_string: 
                 scheduleAllFilesInDirectory(username, new_path, time_string);
             });
         } else {
-            createNewSchedule(username, filename, time_string, (error: any, result: any, fields: any) => {  
+            createNewSchedule(username, filename, time_string, (error: any, result: any, fields: any) => {
                 if (error) {
                     return { error, result: null };
                 } else {
