@@ -222,7 +222,7 @@ app.get('/data', async (req, res) => {
         fs.readdir(user_directory, (error, results) => {
             if (error) {
                 console.error(error);
-                res.status(500).send({ error });
+                res.send(new CustomResponse(500, 'System failure. Try again', {}));
             } else if (results) {
                 const directories: any = [];
                 const files: any = [];
@@ -252,15 +252,15 @@ app.get('/data', async (req, res) => {
                                 }
                             });
                         }
-                        res.status(200).send({ data: { directories, files } });
+                        res.send(new CustomResponse(200, '', { data: { directories, files } }));
                     });
                 } else {
-                    res.status(200).send({ data: { directories, files } });
+                    res.send(new CustomResponse(200, '', { data: { directories, files } }));
                 }
             }
         });
     } else {
-        res.status(500).send({ error: 'Username is not provided' });
+        res.send(new CustomResponse(500, 'Username is not provide', {}));
     }
 });
 

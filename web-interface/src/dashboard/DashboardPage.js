@@ -44,10 +44,17 @@ export default function DashboardPage() {
         if (token?.user && filename && startDate && startTime) {
             return axios.post(`${base_url}/schedule?username=${token.user}&filename=${location}/${filename}&day=${startDate}&time=${startTime}`)
                 .then(response => {
-                    setAlertContent(`${filename} is scheduled to download successfully`);
-                    setAlertType("success");
-                    setShowAlert(true);
-                    return response.data;
+                    if (response.data?.status === 200) {
+                        setAlertContent(`${filename} is scheduled to download successfully`);
+                        setAlertType("success");
+                        setShowAlert(true);
+                        return response.data?.data;
+                    } else {
+                        console.error(new Error(response.data?.message));
+                        setAlertContent(response.data?.message);
+                        setAlertType("danger");
+                        setShowAlert(true);
+                    }
                 })
                 .catch(error => {
                     console.error(error);
@@ -156,7 +163,12 @@ async function getUserDirectories(username, location) {
     }
     return axios.get(url)
         .then(response => {
-            return response.data;
+            if (response.data?.status === 200) {
+                return response.data?.data;
+            } else {
+                console.error(new Error(response.data?.message));
+                return new Error(response.data?.message);
+            }
         })
         .catch(error => {
             console.error(error);
