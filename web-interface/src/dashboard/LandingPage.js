@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
@@ -6,10 +6,11 @@ import Grid from '@mui/material/Grid';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
+import Alert from '@mui/material/Alert';
+import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
-import TextField from '@mui/material/TextField';
 import { base_url } from '../App';
 import { useHistory, useLocation } from 'react-router-dom';
 import Objectives from '../Objectives';
@@ -18,10 +19,10 @@ const LandingPage = ({ setToken }) => {
     let history = useHistory();
     let location = useLocation();
     let { from } = location.state || { from: { pathname: "/data/" } };
-    let [isLogin, setLogin] = React.useState(true);
-    let [username, setUsername] = React.useState();
-    let [password, setPassword] = React.useState();
-    let [error, setError] = React.useState();
+    let [isLogin, setLogin] = useState(true);
+    let [username, setUsername] = useState();
+    let [password, setPassword] = useState();
+    let [error, setError] = useState();
 
     const handleSubmit = e => {
         e.preventDefault();
@@ -73,7 +74,7 @@ const LandingPage = ({ setToken }) => {
                                     {isLogin ? <PersonOutlineIcon /> : <PersonAddAltIcon />}
                                 </Avatar>
                                 <Typography component="h1" variant="h5">{isLogin ? "Login" : "Register"}</Typography>
-                                {error ?? <Typography variant="p">{error}</Typography>}
+                                {error ? (<Alert sx={{ mt: 0, mb: 0 }} severity="error"  >{error}</Alert>) : (<></>)}
                                 <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }}>
                                     <TextField
                                         margin="normal"
