@@ -277,17 +277,17 @@ app.get('/download', async (req, res) => {
             fs.readFile(file, 'utf8', (error, data) => {
                 if (error) {
                     console.error(error);
-                    res.status(500).send({ error });
+                    res.send(new CustomResponse(500, 'System failure. Try again', {}));
                 } else if (data) {
                     console.log(`Successfully downloaded file: ${filename}`);
-                    res.status(200).send({ download: true });
+                    res.send(new CustomResponse(200, '', { download: true }));
                 }
             });
         } else {
-            res.status(404).send({ error: 'File not exists' });
+            res.send(new CustomResponse(404, 'File not exists', {}));
         }
     } else {
-        res.status(500).send({ error: 'Username/Filename is not provided' });
+        res.send(new CustomResponse(400, 'Username/Filename is not provided', {}));
     }
 });
 
@@ -319,15 +319,15 @@ app.post('/schedule', async (req, res) => {
         });
 
         if (splitted_filenames.length === success.length) {
-            res.status(200).send({ download: true });
+            res.send(new CustomResponse(200, '', { download: true }));
         } else if (success.length === 0) {
-            res.status(500).send(err);
+            res.send(new CustomResponse(500, 'System failure. Try again', {}));
         } else {
-            res.status(200).send({ download: true });
+            res.send(new CustomResponse(200, '', { download: true }));
         }
     } else {
         console.error('Username/Filename/Start Time is not provided');
-        res.status(500).send({ error: 'Username/Filename/Start Time is not provided' });
+        res.send(new CustomResponse(400, 'Username/Filename/Start Time is not provided', {}));
     }
 });
 
