@@ -17,6 +17,7 @@ import { comparePassword, hashPassword } from './security/bcrypt';
 import { dowloadScheduledFiles, mountDirectoriesForSavedUsers } from './system_utils/start';
 import { createNewSchedule } from './database/schedule_repository';
 import { getFilesByUserId } from './database/file_repository';
+import { CustomResponse } from './custom_response.ts';
 
 require('dotenv').config();
 
@@ -60,11 +61,11 @@ app.post('/register', (req, res) => {
     getUserByUsername(username, (error: any, result: any, fields: any) => {
         if (error) {
             console.error(error);
-            res.status(500).send({ error: error.message });
+            res.send(new CustomResponse(500, 'System failure. Try again', {}));
         } else if (result.length > 0) {
             console.log(`Successfully received the user ${username} from the database...`);
             console.error(`User: ${username} is already registered`);
-            res.status(500).send(`User: ${username} is already registered`);
+            res.send(new CustomResponse(406, 'User is already registered', {}));
         } else {
             // get access token from server
             console.log(`Connecting to the server for verify user: ${username}`);
@@ -73,7 +74,7 @@ app.post('/register', (req, res) => {
                     let opt: any = JSON.parse(stdout);
                     if (opt.non_field_errors) {
                         console.error(opt.non_field_errors);
-                        res.status(401).send({ error: 'Unable to register with the provided credentials' });
+                        res.send(new CustomResponse(401, 'Unable to register with the provided credentials', {}));
                     } else if (opt.token) {
                         console.log(`Successfully logged in... Username: ${username}`);
                         let user_directory: string = `${base_directory}/${username}`;
@@ -95,16 +96,17 @@ app.post('/register', (req, res) => {
                         hashPassword(password, (error: Error | undefined, hash: string) => {
                             if (error) {
                                 console.error(error);
-                                res.status(500).send({ error: error.message });
+                                res.send(new CustomResponse(500, 'System failure. Try again', {}));
                             } else {
                                 addNewUser(username, hash, `${user_directory}/data`, (error: any, result: any, fields: any) => {
                                     if (error) {
                                         console.error(error);
-                                        res.status(500).send({ error: error.message });
+                                        res.send(new CustomResponse(500, 'System failure. Try again', {}));
                                     } else {
                                         console.log(`Successfully saved the user ${username} in the database...`);
                                         console.log(`Successfully logged in...`);
                                         req.session.user = { name: username, token: opt.token };
+                                        res.send(new CustomResponse(200, '', { token: opt.token }));
                                         res.status(200).send({ token: opt.token });
                                     }
                                 });
@@ -113,7 +115,7 @@ app.post('/register', (req, res) => {
                     }
                 } else {
                     console.error(error ? error.message : stderr);
-                    res.status(500).send({ error: error ? error.message : stderr });
+                    res.send(new CustomResponse(500, 'System failure. Try again', {}));
                 }
             });
         }
@@ -128,7 +130,7 @@ app.post('/login', async (req, res) => {
     getUserByUsername(username, (error: any, result: any, fields: any) => {
         if (error) {
             console.error(`An error occurred... ${error.message}`);
-            res.status(500).send({ error: error.message });
+            res.send(new CustomResponse(500, 'System failure. Try again', {}));
         } else if (result.length > 0) {
             let user_data = result[0];
 
@@ -140,14 +142,14 @@ app.post('/login', async (req, res) => {
                         comparePassword(password, user_data.password, (error: Error | undefined, reply: boolean) => {
                             if (error) {
                                 console.error(`An error occurred... ${error.message}`);
-                                res.status(500).send({ error: error.message });
+                                res.send(new CustomResponse(500, 'System failure. Try again', {}));
                             } else if (reply) {
                                 // Server password changed but not updated the SyncBox
                                 console.error(`${username} has changed the server password...`);
-                                res.status(401).send({ error: 'Server password was changed' });
+                                res.send(new CustomResponse(500, 'Server password has changed', {}));
                             } else {
                                 console.error(`An error occurred... ${opt.non_field_errors}`);
-                                res.status(401).send({ error: opt.non_field_errors });
+                                res.send(new CustomResponse(401, opt.non_field_errors, {}));
                             }
                         });
                     } else if (opt.token) {
@@ -157,13 +159,13 @@ app.post('/login', async (req, res) => {
                                 hashPassword(password, (error: Error | undefined, hash: string) => {
                                     if (error) {
                                         console.error(error);
-                                        res.status(500).send({ error: error.message });
+                                        res.send(new CustomResponse(500, 'System failure. Try again', {}));
                                     } else {
                                         // update the SyncBox password and configuration file
                                         updateUserPasswordByUsername(username, hash, (error: any, result: any, fields: any) => {
                                             if (error) {
                                                 console.error(error);
-                                                res.status(500).send({ error: error.message });
+                                                res.send(new CustomResponse(500, 'System failure. Try again', {}));
                                             } else {
                                                 console.log(`Successfully updated the password of ${username} in the database...`);
                                             }
@@ -174,7 +176,7 @@ app.post('/login', async (req, res) => {
                             }
                             console.log(`${username} successfully logged in...`);
                             req.session.user = { name: username, token: opt.token };
-                            res.status(200).send({ token: opt.token });
+                            res.send(new CustomResponse(200, '', { token: opt.token }));
                         });
                     }
                 } else {
@@ -183,27 +185,27 @@ app.post('/login', async (req, res) => {
                     comparePassword(password, user_data.password, (error: Error | undefined, reply: boolean) => {
                         if (error) {
                             console.error(`An error occurred... ${error.message}`);
-                            res.status(500).send({ error: error.message });
+                            res.send(new CustomResponse(500, 'System failure. Try again', {}));
                         } else if (reply) {
                             let { token, error } = getTokenFromConfigFile(username);
                             if (error) {
                                 console.error(`An error occurred... ${error}`);
-                                res.status(500).send({ error });
+                                res.send(new CustomResponse(500, 'System failure. Try again', {}));
                             } else if (token) {
                                 console.log(`${username} successfully logged in...`);
                                 req.session.user = { name: username, token };
-                                res.status(200).send({ token });
+                                res.send(new CustomResponse(200, '', { token }));
                             }
                         } else {
                             console.error('Incorrect credentials');
-                            res.status(401).send({ error: 'Incorrect credentials' });
+                            res.send(new CustomResponse(401, 'Incorrect credentials', {}));
                         }
                     });
                 }
             });
         } else {
             console.error(`User: ${username} is not registered`);
-            res.status(500).send({ error: `User: ${username} is not registered` });
+            res.send(new CustomResponse(401, 'User is not registered', {}));
         }
     });
 });
@@ -312,7 +314,7 @@ app.post('/schedule', async (req, res) => {
                 }
             } else {
                 console.error(`File ${filename} not found`);
-                err = {error: 'File not exists' };
+                err = { error: 'File not exists' };
             }
         });
 

@@ -26,15 +26,21 @@ const LandingPage = ({ setToken }) => {
     const handleSubmit = e => {
         e.preventDefault();
         setError('');
-        console.log(username, password);
+
         axios.post(isLogin ? `${base_url}/login` : `${base_url}/register`, { username, password })
             .then(response => {
-                setToken({ token: response.data, user: username });
-                history.replace(from);
+                if (response.data?.status === 200) {
+                    setToken({ token: response.data.data, user: username });
+                    history.replace(from);
+                } else {
+                    console.error(new Error(response.data?.message));
+                    setError(response.data?.message);
+                }
             })
             .catch(error => {
+                console.log(error.message);
                 console.error(error);
-                setError(error.message);
+                setError(error.error);
             });
     }
 

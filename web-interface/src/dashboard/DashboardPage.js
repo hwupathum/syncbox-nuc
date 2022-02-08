@@ -116,7 +116,6 @@ export default function DashboardPage() {
                         <ScheduleTile open={open} submit={handleScheduleDownload} filename={checked.join(', ')} selected={checked} ></ScheduleTile>
                         <TableBody>
                             {fileData.directories?.map((directory, key) => {
-                                console.log(checked, allSelected);
                                 let data = {
                                     link: true,
                                     location,
