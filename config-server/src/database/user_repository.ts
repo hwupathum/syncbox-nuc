@@ -1,3 +1,4 @@
+import { CustomResponse } from "../custom_response.ts";
 import { MySQLResponse } from "../model/mysql_response.model";
 import connection from "./connection";
 
@@ -16,7 +17,7 @@ export function getUserByUserId(user_id: number, callback: Function) {
     connection.query(sql_query, (error, result, fields) => callback(error, result, fields));
 }
 
-export async function getUserByUsername(username: string, callback: Function) {
+export function getUserByUsername(username: string, callback: Function) {
     let sql_query = `SELECT * FROM users WHERE username = '${username}'`;
     connection.query(sql_query, (error, result, fields) => callback(new MySQLResponse(error, result, fields)));
 }

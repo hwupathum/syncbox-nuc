@@ -6,7 +6,7 @@ import validateResource from "../utils/validate_resource";
 const router = express.Router();
 
 router.post(
-  "/api/users/login",
+  "/api/users/register",
   validateResource(CREATE_USER_SCHEMA),
   createUserHandler
 );

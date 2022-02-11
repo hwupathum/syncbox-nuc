@@ -14,7 +14,7 @@ import { BcryptResponse } from "../model/bcrypt_response.model";
 
 const base_directory = "/srv/syncbox";
 
-export function createUser(input: Partial<User>) {
+export function createUser(input: Partial<User>, callback: Function) {
   const username: string = input.username!;
   const password: string = input.password!;
   log.info(`Register request... Username: ${username}`);
@@ -23,10 +23,10 @@ export function createUser(input: Partial<User>) {
   getUserByUsername(username, (response: MySQLResponse) => {
     if (response.error) {
       log.error(`An error occurred ... ${response.error.message}`);
-      return new CustomResponse(500, "System failure. Try again", {});
+      callback(new CustomResponse(500, "System failure. Try again", {}));
     } else if (response.results && response.results.length > 0) {
       log.error(`User: ${username} is already registered ...`);
-      return new CustomResponse(409, "User is already registered", {});
+      callback(new CustomResponse(409, "User is already registered", {}));
     } else {
       // get access token from server
       log.info(`Connecting to the server for verify user: ${username} ...`);
@@ -36,10 +36,12 @@ export function createUser(input: Partial<User>) {
 
           if (opt.non_field_errors) {
             log.error(`An error occurred ... ${opt.non_field_errors}`);
-            return new CustomResponse(
-              401,
-              "Unable to register with the provided credentials",
-              {}
+            callback(
+              new CustomResponse(
+                401,
+                "Unable to register with the provided credentials",
+                {}
+              )
             );
           } else if (opt.token) {
             log.info(`Successfully logged in... Username: ${username}`);
@@ -59,7 +61,9 @@ export function createUser(input: Partial<User>) {
             hashPassword(password, (response: BcryptResponse) => {
               if (response.error) {
                 log.error(`An error occurred ... ${response.error.message}`);
-                return new CustomResponse(500, "System failure. Try again", {});
+                callback(
+                  new CustomResponse(500, "System failure. Try again", {})
+                );
               } else {
                 addNewUser(
                   username,
@@ -70,14 +74,21 @@ export function createUser(input: Partial<User>) {
                       log.error(
                         `An error occurred ... ${response.error.message}`
                       );
-                      return new CustomResponse(
-                        500,
-                        "User saving failed. Try again",
-                        {}
+                      callback(
+                        new CustomResponse(
+                          500,
+                          "User saving failed. Try again",
+                          {}
+                        )
                       );
                     } else {
                       log.info(`Successfully logged in ...`);
-                      return new CustomResponse(200, "", { username, token: opt.token });
+                      callback(
+                        new CustomResponse(200, "", {
+                          username,
+                          token: opt.token,
+                        })
+                      );
                     }
                   }
                 );
@@ -90,7 +101,7 @@ export function createUser(input: Partial<User>) {
               response.error ? response.error.message : response.stderr
             }`
           );
-          return new CustomResponse(500, "System failure. Try again", {});
+          callback(new CustomResponse(500, "System failure. Try again", {}));
         }
       });
     }
