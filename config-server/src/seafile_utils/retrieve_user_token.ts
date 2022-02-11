@@ -1,8 +1,9 @@
 import { exec } from "child_process";
 import config from "config";
+import readFile from "../file_system_utils/read_file";
 import { SeafileResponse } from "../model/seafile_response.model";
 
-export default function retrieveUserToken(
+export function retrieveUserTokenFromServer(
   username: string,
   password: string,
   callback: Function
@@ -12,4 +13,14 @@ export default function retrieveUserToken(
   exec(command, (error, stdout, stderr) =>
     callback(new SeafileResponse(error, stdout, stderr))
   );
+}
+
+export function retrieveUserTokenFromConfigFile(
+  file_name: string,
+  callback: Function
+) {
+  const { error, content } = readFile(file_name);
+  if (content) {
+    callback(error, content.split("\n")[3].substring(8));
+  }
 }
