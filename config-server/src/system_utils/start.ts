@@ -2,7 +2,7 @@ import cron from 'node-cron';
 import fs from 'fs';
 import { deleteScheduleById, getAllSchedules } from '../database/schedule_repository';
 import { getAllUsers, getUserByUserId } from "../database/user_repository";
-import mountSeadrive from "../seafile_utils/mountSeadrive";
+import mountSeadrive from "../seafile_utils/mount_seadrive";
 import unmountDirectory from "./unmountDirectory";
 import { updateFileSyncedTime } from '../database/file_repository';
 
