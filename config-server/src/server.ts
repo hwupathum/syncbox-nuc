@@ -4,7 +4,7 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
-import mountSeadrive from './seafile_utils/mountSeadrive';
+import mountSeadrive from './seafile_utils/mount_seadrive';
 import createConfig from './seafile_utils/createConfig';
 import getToken from './seafile_utils/getToken';
 import path from 'path';
