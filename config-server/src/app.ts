@@ -9,7 +9,10 @@ import config from "config";
 import log from "./utils/logger";
 import connectToMySQLDatabase from "./utils/mysql_connection";
 import router from "./routes";
-import { mountDirectoriesForSavedUsers } from "./system_utils/start";
+import {
+  dowloadScheduledFiles,
+  mountDirectoriesForSavedUsers,
+} from "./system_utils/start";
 
 declare module "express-session" {
   export interface SessionData {
@@ -47,4 +50,5 @@ app.listen(server_port, () => {
   log.info(`Application started at http://${ip.address()}:${server_port} ...`);
   connectToMySQLDatabase();
   mountDirectoriesForSavedUsers();
+  dowloadScheduledFiles();
 });

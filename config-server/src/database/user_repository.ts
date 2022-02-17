@@ -27,7 +27,7 @@ export function getAllUsers(callback: Function) {
 export function getUserByUserId(user_id: number, callback: Function) {
   let sql_query = `SELECT * FROM users WHERE user_id = ${user_id}`;
   connection.query(sql_query, (error, result, fields) =>
-    callback(error, result, fields)
+    callback(new MySQLResponse(error, result, fields))
   );
 }
 

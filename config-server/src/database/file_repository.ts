@@ -19,6 +19,6 @@ export function updateFileSyncedTime(
 ) {
   let sql_query = `UPDATE files SET synced_time = NOW() WHERE user_id = ${user_id} AND full_path = '${file_names}'`;
   connection.query(sql_query, (error, result, fields) =>
-    callback(error, result, fields)
+    callback(new MySQLResponse(error, result, fields))
   );
 }

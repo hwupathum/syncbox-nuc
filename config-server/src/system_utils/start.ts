@@ -10,13 +10,14 @@ import mountSeadrive from "../seafile_utils/mount_seadrive";
 import unmountDirectory from "./unmountDirectory";
 import { updateFileSyncedTime } from "../database/file_repository";
 import { MySQLResponse } from "../model/mysql_response.model";
+import log from "../utils/logger";
 
 const base_directory = config.get("base_directory");
 
 export function mountDirectoriesForSavedUsers() {
   getAllUsers((response: MySQLResponse) => {
     if (response.error) {
-      console.error(response.error);
+      log.error(`An error occurred ... ${response.error}`);
     } else if (response.results && response.results.length > 0) {
       for (let index in response.results) {
         let user = response.results[index];
@@ -34,66 +35,60 @@ export function mountDirectoriesForSavedUsers() {
   });
 }
 
-export function dowloadScheduledFiles(directory: string) {
+export function dowloadScheduledFiles() {
   cron.schedule("* * * * *", () => {
-    getAllSchedules((error: any, results: any, fields: any) => {
-      if (error) {
-        console.error(error);
-      } else if (results && results.length > 0) {
+    getAllSchedules((response: MySQLResponse) => {
+      if (response.error) {
+        log.error(`An error occurred ... ${response.error}`);
+      } else if (response.results && response.results.length > 0) {
         let current = new Date();
-        results.forEach((schedule: any) => {
+        response.results.forEach((schedule: any) => {
           if (current >= schedule.start_time) {
-            console.log(`Date Matched for file ${schedule.full_path}`);
-
-            getUserByUserId(
-              schedule.user_id,
-              (error: any, result: any, fields: any) => {
-                if (error) {
-                  console.error(error);
-                } else if (result && result.length > 0) {
-                  let user = result[0];
-                  let file_path = `${user.scope}/${schedule.full_path}`;
-                  console.log(file_path);
-
-                  deleteScheduleById(
-                    schedule.schedule_id,
-                    (error: any, result: any, fields: any) => {
-                      if (error) {
-                        console.error(error);
-                      } else if (fs.existsSync(file_path)) {
-                        console.log(
-                          `Downloading file: ${schedule.full_path}...`
-                        );
-                        fs.readFile(file_path, "utf8", (error, data) => {
-                          if (error) {
-                            console.error(error);
-                          } else if (data) {
-                            console.log(
-                              `Successfully downloaded file: ${schedule.full_path}`
-                            );
-                            updateFileSyncedTime(
-                              schedule.user_id,
-                              schedule.full_path,
-                              (error: any, result: any, fields: any) => {
-                                if (error) {
-                                  console.error(error);
-                                } else {
-                                  console.log(
-                                    `Database updated for ${schedule.full_path} file with synced data`
-                                  );
-                                }
+            log.info(`Date Matched for file ${schedule.full_path} ...`);
+            getUserByUserId(schedule.user_id, (response: MySQLResponse) => {
+              if (response.error) {
+                log.error(`An error occurred ... ${response.error}`);
+              } else if (response.results && response.results.length > 0) {
+                let user = response.results[0];
+                let file_path = `${user.scope}/${schedule.full_path}`;
+                deleteScheduleById(
+                  schedule.schedule_id,
+                  (response: MySQLResponse) => {
+                    if (response.error) {
+                      log.error(`An error occurred ... ${response.error}`);
+                    } else if (fs.existsSync(file_path)) {
+                      console.log(`Downloading file: ${schedule.full_path}...`);
+                      fs.readFile(file_path, "utf8", (error, data) => {
+                        if (error) {
+                          log.error(`An error occurred ... ${response.error}`);
+                        } else if (data) {
+                          log.info(
+                            `Successfully downloaded file: ${schedule.full_path} ...`
+                          );
+                          updateFileSyncedTime(
+                            schedule.user_id,
+                            schedule.full_path,
+                            (response: MySQLResponse) => {
+                              if (response.error) {
+                                log.error(
+                                  `An error occurred ... ${response.error}`
+                                );
+                              } else {
+                                log.info(
+                                  `Database updated for ${schedule.full_path} file with synced data ...`
+                                );
                               }
-                            );
-                          }
-                        });
-                      } else {
-                        console.log("File not exists");
-                      }
+                            }
+                          );
+                        }
+                      });
+                    } else {
+                      log.error(`File: ${file_path} not exists ...`);
                     }
-                  );
-                }
+                  }
+                );
               }
-            );
+            });
           }
         });
       }
