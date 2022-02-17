@@ -14,7 +14,7 @@ router.get(
   retrieveDirectoriesHandler
 );
 
-router.get(
+router.post(
   "/api/schedule",
   // validateResource(RETRIEVE_DIRECTORIES_SCHEMA),
   scheduleDownloadHandler

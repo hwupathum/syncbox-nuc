@@ -42,7 +42,7 @@ export default function DashboardPage() {
 
     const handleScheduleDownload = async (filename, startDate, startTime) => {
         if (token?.user && filename && startDate && startTime) {
-            return axios.post(`${base_url}/schedule?username=${token.user}&filename=${location}/${filename}&day=${startDate}&time=${startTime}`)
+            return axios.post(`${base_url}/schedule?username=${token.user}&filenames=${location}/${filename}&day=${startDate}&time=${startTime}`)
                 .then(response => {
                     if (response.data?.status === 200) {
                         setAlertContent(`${filename} is scheduled to download successfully`);

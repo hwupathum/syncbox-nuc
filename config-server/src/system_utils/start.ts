@@ -1,12 +1,15 @@
 import cron from 'node-cron';
 import fs from 'fs';
+import config from "config";
 import { deleteScheduleById, getAllSchedules } from '../database/schedule_repository';
 import { getAllUsers, getUserByUserId } from "../database/user_repository";
 import mountSeadrive from "../seafile_utils/mount_seadrive";
 import unmountDirectory from "./unmountDirectory";
 import { updateFileSyncedTime } from '../database/file_repository';
 
-export function mountDirectoriesForSavedUsers(base_directory: string) {
+const base_directory = config.get("base_directory");
+
+export function mountDirectoriesForSavedUsers(directory: string) {
     getAllUsers((error: any, result: any, fields: any) => {
         if (error) {
             console.error(error);
@@ -22,7 +25,7 @@ export function mountDirectoriesForSavedUsers(base_directory: string) {
     });
 }
 
-export function dowloadScheduledFiles(base_directory: string) {
+export function dowloadScheduledFiles(directory: string) {
     cron.schedule('* * * * *', () => {
         getAllSchedules((error: any, results: any, fields: any) => {
             if (error) {
