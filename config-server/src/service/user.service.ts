@@ -1,4 +1,5 @@
 import { CustomResponse } from "../custom_response.ts";
+import config from "config";
 import {
   addNewUser,
   getUserByUsername,
@@ -18,10 +19,9 @@ import configFileTemplate from "../seafile_utils/config_file_template";
 import mountSeadrive from "../seafile_utils/mount_seadrive";
 import { comparePassword, hashPassword } from "../security/bcrypt";
 import { BcryptResponse } from "../model/bcrypt_response.model";
-import updateFile from "../file_system_utils/update_file";
 import updateSeafileConfigurationFile from "../seafile_utils/update_config";
 
-const base_directory = "/srv/syncbox";
+const base_directory = config.get("base_directory");
 
 export function createUser(input: Partial<User>, callback: Function) {
   const username: string = input.username!;
@@ -161,8 +161,12 @@ export function loginUser(input: Partial<User>, callback: Function) {
                       new CustomResponse(500, "Server password has changed", {})
                     );
                   } else {
-                    log.error(`An error occurred ... ${opt.non_field_errors[0]}`);
-                    callback(new CustomResponse(401, opt.non_field_errors[0], {}));
+                    log.error(
+                      `An error occurred ... ${opt.non_field_errors[0]}`
+                    );
+                    callback(
+                      new CustomResponse(401, opt.non_field_errors[0], {})
+                    );
                   }
                 }
               );

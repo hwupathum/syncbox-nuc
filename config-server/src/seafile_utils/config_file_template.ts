@@ -5,9 +5,9 @@ export default function configFileTemplate(
   token: string,
   client: string
 ) {
-  const seafile_server = config.get("seafile_server");
+  const seafile_host = config.get("seafile_host");
   return `[account]
- server = ${seafile_server}
+ server = ${seafile_host}
  username = ${username}
  token = ${token}
  is_pro = false

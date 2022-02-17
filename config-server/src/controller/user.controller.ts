@@ -1,12 +1,9 @@
 import { Request, Response } from "express";
 import { CustomResponse } from "../custom_response.ts";
-import { CreateUserInput, LoginUserInput } from "../schema/user.schema";
+// import { CreateUserInput, LoginUserInput } from "../schema/user.schema";
 import { createUser, loginUser } from "../service/user.service";
 
-export async function createUserHandler(
-  req: Request<{}, {}, CreateUserInput>,
-  res: Response
-) {
+export async function createUserHandler(req: Request, res: Response) {
   const body = req.body;
   try {
     createUser(body, (response: CustomResponse) => {
@@ -23,10 +20,7 @@ export async function createUserHandler(
   }
 }
 
-export async function loginUserHandler(
-  req: Request<{}, {}, LoginUserInput>,
-  res: Response
-) {
+export async function loginUserHandler(req: Request, res: Response) {
   const body = req.body;
   try {
     loginUser(body, (response: CustomResponse) => {

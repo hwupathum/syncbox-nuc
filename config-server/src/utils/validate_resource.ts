@@ -13,9 +13,9 @@ const validateResource =
         params: req.params,
       });
       next();
-    } catch (error: any) {
-      log.error(`An error occurred ... ${error.errors[0]?.message}`);
-      return res.send(new CustomResponse(400, error.errors[0]?.message, {}));
+    } catch (error) {
+      log.error(`An error occurred ... ${error}`);
+      return res.send(new CustomResponse(400, "System failure. Try again", {}));
     }
   };
 

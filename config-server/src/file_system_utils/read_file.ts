@@ -7,9 +7,9 @@ export default function readFile(file_name: string) {
     try {
       let content = fs.readFileSync(file_name, "utf8");
       return { content };
-    } catch (error: any) {
-      log.error(`An error occurred... ${error.message}`);
-      return { error: error.message };
+    } catch (error) {
+      log.error(`An error occurred... ${error}`);
+      return { error: error };
     }
   } else {
     log.error(`${file_name} not exists ...`);

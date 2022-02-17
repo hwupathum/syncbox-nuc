@@ -5,13 +5,14 @@
   "main": "src/server.ts",
   "scripts": {
     "build": "rm -rf build/ && prettier --write src/ && tsc",
-    "start": "tsc && node build/server.js",
+    "start": "tsc && node build/src/app.js",
     "start:dev": "tsc && nodemon src/app.ts "
   },
   "author": "MelangaK97",
   "license": "ISC",
   "dependencies": {
     "@types/config": "0.0.41",
+    "@types/ip": "^1.1.0",
     "@types/pino": "^7.0.5",
     "bcrypt": "^5.0.1",
     "body-parser": "^1.19.0",
@@ -21,9 +22,11 @@
     "dotenv": "^14.3.2",
     "express-session": "^1.17.2",
     "ioredis": "^4.28.0",
+    "ip": "^1.1.5",
     "mysql": "^2.18.1",
     "mysql2": "^2.3.0",
     "node-cron": "^3.0.0",
+    "node-ip": "^0.1.2",
     "nodemon": "^2.0.12",
     "os": "^0.1.2",
     "pino-pretty": "^7.5.1",
