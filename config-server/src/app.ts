@@ -46,5 +46,5 @@ app.use(router);
 app.listen(server_port, () => {
   log.info(`Application started at http://${ip.address()}:${server_port} ...`);
   connectToMySQLDatabase();
-  mountDirectoriesForSavedUsers('');
+  mountDirectoriesForSavedUsers();
 });

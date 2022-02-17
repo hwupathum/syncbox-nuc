@@ -20,7 +20,7 @@ export function addNewUser(
 export function getAllUsers(callback: Function) {
   let sql_query = "SELECT * FROM users";
   connection.query(sql_query, (error, result, fields) =>
-    callback(error, result, fields)
+    callback(new MySQLResponse(error, result, fields))
   );
 }
 
