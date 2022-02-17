@@ -157,10 +157,7 @@ export default function DashboardPage() {
 }
 
 async function getUserDirectories(username, location) {
-    let url = `${base_url}/data?username=${username}`;
-    if (location) {
-        url += `&location=${location}`;
-    }
+    let url = `${base_url}/files?username=${username}&location=${location ?? '/'}`;
     return axios.get(url)
         .then(response => {
             if (response.data?.status === 200) {

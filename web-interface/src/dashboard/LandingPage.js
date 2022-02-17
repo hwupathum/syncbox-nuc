@@ -28,7 +28,7 @@ const LandingPage = ({ setToken }) => {
         e.preventDefault();
         setError('');
 
-        axios.post(isLogin ? `${base_url}/login` : `${base_url}/register`, { username, password })
+        axios.post(isLogin ? `${base_url}/users/login` : `${base_url}/users/register`, { username, password })
             .then(response => {
                 if (response.data?.status === 200) {
                     setToken({ token: response.data.data, user: username });
