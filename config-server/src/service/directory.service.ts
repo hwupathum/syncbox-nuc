@@ -8,6 +8,8 @@ import log from "../utils/logger";
 import { User } from "../model/user.model";
 import convertBytes from "../file_system_utils/file_size_converter";
 import { getFilesByUserId } from "../database/file_repository";
+import { string } from "zod";
+import { createNewSchedule } from "../database/schedule_repository";
 
 const base_directory = config.get("base_directory");
 
@@ -89,3 +91,92 @@ export function retrieveDirectories(
     }
   });
 }
+
+export function scheduleDownload(
+  username: string,
+  filenames: string,
+  day: string,
+  time: string,
+  callback: Function
+) {
+  if (username && filenames && day && time) {
+    const splitted_filenames = filenames?.toString().split(", ");
+    let success = [];
+    let err;
+    splitted_filenames.forEach((filename) => {
+      let path: string = `${base_directory}/${username}/data${filename}`;
+      if (fs.existsSync(path)) {
+        const { error, result } = scheduleAllFilesInDirectory(
+          username,
+          filename,
+          `${day} ${time}`
+        );
+        if (error) {
+          log.error(error);
+          err = error;
+        } else {
+          success.push(filename);
+        }
+      } else {
+        log.error(`File ${filename} not found ...`);
+        err = { error: "File not exists" };
+      }
+    });
+
+    if (splitted_filenames.length === success.length) {
+      callback(new CustomResponse(200, "", { download: true }));
+    } else if (success.length === 0) {
+      callback(new CustomResponse(500, "System failure. Try again", {}));
+    } else {
+      callback(new CustomResponse(200, "", { download: true }));
+    }
+  } else {
+    console.error("Username/Filename/Start Time is not provided");
+    callback(
+      new CustomResponse(
+        400,
+        "Username/Filename/Start Time is not provided",
+        {}
+      )
+    );
+  }
+}
+
+const scheduleAllFilesInDirectory = (
+  username: any,
+  filename: any,
+  time_string: string
+) => {
+  try {
+    if (
+      fs
+        .lstatSync(`${base_directory}/${username}/data${filename}`)
+        .isDirectory()
+    ) {
+      fs.readdirSync(`${base_directory}/${username}/data${filename}`).forEach(
+        (file) => {
+          let new_path: string = `/${filename}/${file}`;
+          scheduleAllFilesInDirectory(username, new_path, time_string);
+        }
+      );
+    } else {
+      createNewSchedule(
+        username,
+        filename,
+        time_string,
+        (response: MySQLResponse) => {
+          if (response.error) {
+            return { error: response.error, result: null };
+          } else {
+            log.info(
+              `File ${filename} of ${username} was scheduled for download on ${time_string} ...`
+            );
+          }
+        }
+      );
+    }
+    return { error: null, result: true };
+  } catch (error) {
+    return { error, result: null };
+  }
+};

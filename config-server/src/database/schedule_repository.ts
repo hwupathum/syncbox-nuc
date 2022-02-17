@@ -1,3 +1,4 @@
+import { MySQLResponse } from "../model/mysql_response.model";
 import connection from "./connection";
 
 export function createNewSchedule(
@@ -8,7 +9,7 @@ export function createNewSchedule(
 ) {
   let sql_query = `INSERT INTO schedules (user_id, full_path, start_time) VALUES ((SELECT user_id FROM users WHERE username = '${username}'), '${path}', '${time}')`;
   connection.query(sql_query, (error, result, fields) =>
-    callback(error, result, fields)
+    callback(new MySQLResponse(error, result, fields))
   );
 }
 
