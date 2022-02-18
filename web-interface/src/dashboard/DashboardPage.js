@@ -116,7 +116,7 @@ export default function DashboardPage() {
                                 <TableCell>Name</TableCell>
                                 <TableCell align="right">Size</TableCell>
                                 <TableCell align="right">Last Updated</TableCell>
-                                <TableCell align="right">Synced</TableCell>
+                                <TableCell align="right">Status</TableCell>
                                 <TableCell></TableCell>
                             </TableRow>
                         </TableHead>

@@ -29,7 +29,7 @@ export default function DirectoryTile(props) {
             </TableCell>
             <TableCell align="right">{data.size}</TableCell>
             <TableCell align="right">{data.last_updated || 'N/A'}</TableCell>
-            <TableCell align="right">{data.last_synced || 'N/A'}</TableCell>
+            <TableCell align="right">{getSyncStatus(data.last_synced, data.last_updated)}</TableCell>
             <TableCell align="center">
                 {!data.checked && <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)} >
                     {open ? <CancelIcon /> : <DownloadIcon />}
@@ -53,5 +53,17 @@ const getFileTypeIcon = (type) => {
         return <ArticleIcon />
     } else {
         return <HelpOutlineIcon />
+    }
+}
+
+const getSyncStatus = (last_synced, last_updated) => {
+    if (!last_synced) {
+        return "Not Synced";
+    } else if (!last_updated) {
+        return "N/A";
+    } else if (last_synced > last_updated) {
+        return "Synced";
+    } else {
+        return "New Version Available";
     }
 }
