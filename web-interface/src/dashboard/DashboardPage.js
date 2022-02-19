@@ -5,7 +5,7 @@ import Table from '@mui/material/Table';
 import TableHead from '@mui/material/TableHead';
 import TableBody from '@mui/material/TableBody';
 import TableRow from '@mui/material/TableRow';
-import TableCell from '@mui/material/TableCell';
+import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import Checkbox from '@mui/material/Checkbox';
 import TableContainer from '@mui/material/TableContainer';
 import Paper from '@mui/material/Paper';
@@ -16,6 +16,7 @@ import DirectoryTile from "./components/DirectoryTile";
 import IconButton from '@mui/material/IconButton';
 import DownloadIcon from '@mui/icons-material/Download';
 import ScheduleTile from "./components/ScheduleTile";
+import { styled } from '@mui/material/styles';
 
 export default function DashboardPage() {
     const [fileData, setFileData] = useState({});
@@ -98,6 +99,16 @@ export default function DashboardPage() {
         }
     }
 
+    const StyledTableCell = styled(TableCell)(({ theme }) => ({
+        [`&.${tableCellClasses.head}`]: {
+          backgroundColor: theme.palette.common.black,
+          color: theme.palette.common.white,
+        },
+        [`&.${tableCellClasses.body}`]: {
+          fontSize: 14,
+        },
+      }));
+
     return (
         <div>
             <Container maxWidth="md" component="main" sx={{ pt: 6, pb: 6 }}>
@@ -106,18 +117,18 @@ export default function DashboardPage() {
                     <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
                         <TableHead>
                             <TableRow>
-                                <TableCell>
+                                <StyledTableCell>
                                     <Checkbox value="all" checked={allSelected} indeterminate={checked.length > 0 && !allSelected} onChange={handleSelectAll} />
                                     {checked.length > 0 && <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)} >
                                         <DownloadIcon />
                                     </IconButton>}
-                                </TableCell>
-                                <TableCell></TableCell>
-                                <TableCell>Name</TableCell>
-                                <TableCell align="right">Size</TableCell>
-                                <TableCell align="right">Last Updated</TableCell>
-                                <TableCell align="right">Status</TableCell>
-                                <TableCell></TableCell>
+                                </StyledTableCell>
+                                <StyledTableCell></StyledTableCell>
+                                <StyledTableCell>Name</StyledTableCell>
+                                <StyledTableCell align="right">Size</StyledTableCell>
+                                <StyledTableCell align="right">Last Updated</StyledTableCell>
+                                <StyledTableCell align="right">Status</StyledTableCell>
+                                <StyledTableCell></StyledTableCell>
                             </TableRow>
                         </TableHead>
                         <ScheduleTile open={open} submit={handleScheduleDownload} filename={checked.join(', ')} selected={checked} ></ScheduleTile>
@@ -132,7 +143,7 @@ export default function DashboardPage() {
                                     checked: checked.includes(directory.name) || allSelected,
                                     handleChange: (e) => handleSelect(e, directory.name)
                                 };
-                                return <DirectoryTile key={key} data={data} submit={handleScheduleDownload} />
+                                return <DirectoryTile folder={true} key={key} data={data} submit={handleScheduleDownload} />
                             })}
                             {fileData.files?.map((file, key) => {
                                 let data = {

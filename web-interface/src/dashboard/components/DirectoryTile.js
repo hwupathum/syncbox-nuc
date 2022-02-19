@@ -5,17 +5,17 @@ import Link from '@mui/material/Link';
 import IconButton from '@mui/material/IconButton';
 import DownloadIcon from '@mui/icons-material/Download';
 import CancelIcon from '@mui/icons-material/Cancel';
-import FileCopyIcon from '@mui/icons-material/FileCopy';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import ImageIcon from '@mui/icons-material/Image';
-import MusicNoteIcon from '@mui/icons-material/MusicNote';
-import ArticleIcon from '@mui/icons-material/Article';
-import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import AudioFileIcon from '@mui/icons-material/AudioFile';
+import DescriptionIcon from '@mui/icons-material/Description';
+import VideoFileIcon from '@mui/icons-material/VideoFile';
 import Checkbox from '@mui/material/Checkbox';
 import ScheduleTile from './ScheduleTile';
+import FolderIcon from '@mui/icons-material/Folder';
 
 export default function DirectoryTile(props) {
-    let { data, submit } = props;
+    let { data, submit, folder = false } = props;
     const [open, setOpen] = useState(false);
 
     return (<>
@@ -23,7 +23,7 @@ export default function DirectoryTile(props) {
             <TableCell>
                 <Checkbox checked={data.checked} onChange={data.handleChange} />
             </TableCell>
-            <TableCell align="right">{getFileTypeIcon(data.type)}</TableCell>
+            <TableCell align="right">{!folder ? getFileTypeIcon(data.type) : <FolderIcon color='primary'/>}</TableCell>
             <TableCell component="th" scope="row">
                 <Link href={data.link ? `/data/${data.location}/${data.name}` : '#'} underline="none">{data.name}</Link>
             </TableCell>
@@ -42,17 +42,17 @@ export default function DirectoryTile(props) {
 
 const getFileTypeIcon = (type) => {
     if (type === '') {
-        return <FileCopyIcon />
+        return <InsertDriveFileIcon color='primary' />
     } else if (['.jpg', '.png', '.jpeg'].indexOf(type) > -1) {
-        return <ImageIcon />
+        return <ImageIcon color='primary' />
     } else if (['.mp3'].indexOf(type) > -1) {
-        return <MusicNoteIcon />
+        return <AudioFileIcon color='primary' />
     } else if (['.mp4', '.mkv'].indexOf(type) > -1) {
-        return <OndemandVideoIcon />
+        return <VideoFileIcon color='primary' />
     } else if (['.srt', '.txt'].indexOf(type) > -1) {
-        return <ArticleIcon />
+        return <DescriptionIcon color='primary' />
     } else {
-        return <HelpOutlineIcon />
+        return <InsertDriveFileIcon color='primary'/>
     }
 }
 

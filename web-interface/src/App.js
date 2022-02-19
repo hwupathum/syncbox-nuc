@@ -6,22 +6,42 @@ import useToken from "./auth/Token";
 import DashboardPage from "./dashboard/DashboardPage";
 import ResponsiveAppBar from "./ResponsiveAppBar";
 import LandingPage from "./dashboard/LandingPage";
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { purple } from '@mui/material/colors';
+import AuthPage from "./dashboard/AuthPage";
 
-export const base_url = "http://localhost:1905/api";
+const theme = createTheme({
+  palette: {
+    primary: {
+      // Purple and green play nicely together.
+      main: '#f19645',
+    },
+    secondary: {
+      // This is green.A700 as hex.
+      main: '#fff',
+    },
+  },
+});
+
+
+export const base_url = "http://192.168.1.2:1905/api";
 
 export default function App() {
   axios.defaults.withCredentials = true;
   const { token, saveToken, deleteToken } = useToken();
 
   return (
-    <Router>
-      <div>
-      <ResponsiveAppBar token={token} deleteToken={deleteToken} />
+    <ThemeProvider theme={theme}>
+      <Router>
+        <ResponsiveAppBar token={token} deleteToken={deleteToken} />
         <Switch>
-          <Route exact path="/"><LandingPage setToken={saveToken} /></Route>
+          {!token && <Router path="/">
+            <AuthPage setToken={saveToken}/>
+          </Router>}
           <PrivateRoute path="/data/*"><DashboardPage /></PrivateRoute>
+          {/* <Route path="/"><LandingPage setToken={saveToken} /></Route> */}
         </Switch>
-      </div>
-    </Router>
+      </Router>
+    </ThemeProvider>
   );
 }
