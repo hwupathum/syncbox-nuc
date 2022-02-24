@@ -63,10 +63,6 @@ export default function SchedulesPage() {
     }
   };
 
-  const clearEntry = (e) => {
-    console.log(checked);
-  };
-
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       //   backgroundColor: theme.palette.common.black,
@@ -89,53 +85,65 @@ export default function SchedulesPage() {
         ) : (
           <></>
         )}
-
-        <TableContainer component={Paper}>
-          <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
-            <TableHead>
-              <TableRow>
-                <StyledTableCell width={80}>
-                  <Checkbox
-                    color="primary"
-                    value="all"
-                    checked={allSelected}
-                    indeterminate={checked.length > 0 && !allSelected}
-                    onChange={handleSelectAll}
-                  />
-                  {checked.length > 0 && (
-                    <IconButton
-                      color="info"
-                      aria-label="expand row"
-                      size="small"
-                      onClick={clearEntry}
-                    >
-                      <DeleteForeverIcon color="primary" />
-                    </IconButton>
-                  )}
-                </StyledTableCell>
-                <StyledTableCell></StyledTableCell>
-                <StyledTableCell>Filepath</StyledTableCell>
-                <StyledTableCell align="right">Date & Time</StyledTableCell>
-                <StyledTableCell align="right">Scheduled</StyledTableCell>
-                <StyledTableCell></StyledTableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {schedules?.map((schedule, key) => {
-                let data = {
-                  id: schedule.schedule_id,
-                  file_path: schedule.full_path,
-                  start_time: schedule.start_time,
-                  checked: checked.includes(schedule.schedule_id) || allSelected,
-                  handleChange: (e) => handleSelect(e, schedule.schedule_id),
-                };
-                return (
-                  <DownloadFileTile key={key} data={data} submit={clearEntry} />
-                );
-              })}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        {schedules?.length > 0 ? (
+          <TableContainer component={Paper}>
+            <Table
+              sx={{ minWidth: 650 }}
+              size="small"
+              aria-label="a dense table"
+            >
+              <TableHead>
+                <TableRow>
+                  <StyledTableCell width={80}>
+                    <Checkbox
+                      color="primary"
+                      value="all"
+                      checked={allSelected}
+                      indeterminate={checked.length > 0 && !allSelected}
+                      onChange={handleSelectAll}
+                    />
+                    {checked.length > 0 && (
+                      <IconButton
+                        color="info"
+                        aria-label="expand row"
+                        size="small"
+                        onClick={() => clearEntry(checked.join(", "))}
+                      >
+                        <DeleteForeverIcon color="primary" />
+                      </IconButton>
+                    )}
+                  </StyledTableCell>
+                  <StyledTableCell></StyledTableCell>
+                  <StyledTableCell>Filepath</StyledTableCell>
+                  <StyledTableCell align="right">Date & Time</StyledTableCell>
+                  <StyledTableCell align="right">Scheduled</StyledTableCell>
+                  <StyledTableCell></StyledTableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {schedules?.map((schedule, key) => {
+                  let data = {
+                    id: schedule.schedule_id,
+                    file_path: schedule.full_path,
+                    start_time: schedule.start_time,
+                    checked:
+                      checked.includes(schedule.schedule_id) || allSelected,
+                    handleChange: (e) => handleSelect(e, schedule.schedule_id),
+                  };
+                  return (
+                    <DownloadFileTile
+                      key={key}
+                      data={data}
+                      submit={() => clearEntry(schedule.schedule_id)}
+                    />
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        ) : (
+          <p>No data found!</p>
+        )}
       </Container>
     </div>
   );
@@ -157,4 +165,24 @@ async function getUserScheduleDownloads(username) {
       console.error(error);
       return error;
     });
+}
+
+function clearEntry(schedule_ids) {
+  if (schedule_ids) {
+    let url = `${base_url}/schedules?ids=${schedule_ids}`;
+    return axios
+      .delete(url)
+      .then((response) => {
+        if (response.data?.status === 200) {
+          return response.data?.data;
+        } else {
+          console.error(new Error(response.data?.message));
+          return new Error(response.data?.message);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        return error;
+      });
+  }
 }

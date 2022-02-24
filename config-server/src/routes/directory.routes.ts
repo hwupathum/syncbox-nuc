@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  deleteScheduleHandler,
   retrieveDirectoriesHandler,
   retrieveSchedulesHandler,
   scheduleDownloadHandler,
@@ -25,6 +26,12 @@ router.post(
   "/api/schedules",
   // validateResource(RETRIEVE_DIRECTORIES_SCHEMA),
   scheduleDownloadHandler
+);
+
+router.delete(
+  "/api/schedules",
+  // validateResource(RETRIEVE_DIRECTORIES_SCHEMA),
+  deleteScheduleHandler
 );
 
 export default router;
