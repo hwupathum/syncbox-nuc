@@ -1,6 +1,7 @@
 import express from "express";
 import {
   retrieveDirectoriesHandler,
+  retrieveSchedulesHandler,
   scheduleDownloadHandler,
 } from "../controller/directory.controller";
 // import { RETRIEVE_DIRECTORIES_SCHEMA } from "../schema/files.schema";
@@ -14,8 +15,14 @@ router.get(
   retrieveDirectoriesHandler
 );
 
+router.get(
+  "/api/schedules",
+  // validateResource(RETRIEVE_DIRECTORIES_SCHEMA),
+  retrieveSchedulesHandler
+);
+
 router.post(
-  "/api/schedule",
+  "/api/schedules",
   // validateResource(RETRIEVE_DIRECTORIES_SCHEMA),
   scheduleDownloadHandler
 );

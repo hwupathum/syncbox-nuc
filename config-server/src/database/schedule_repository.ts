@@ -20,6 +20,13 @@ export function getAllSchedules(callback: Function) {
   );
 }
 
+export function getAllSchedulesByUsername(username: string, callback: Function) {
+  let sql_query = `SELECT * FROM schedules WHERE user_id = (SELECT user_id FROM users WHERE username = '${username}')`;
+  connection.query(sql_query, (error, result, fields) =>
+    callback(new MySQLResponse(error, result, fields))
+  );
+}
+
 export function deleteScheduleById(schedule_id: number, callback: Function) {
   let sql_query = `DELETE FROM schedules WHERE schedule_id = ${schedule_id}`;
   connection.query(sql_query, (error, result, fields) =>

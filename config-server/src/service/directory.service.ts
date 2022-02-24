@@ -9,7 +9,11 @@ import { User } from "../model/user.model";
 import convertBytes from "../file_system_utils/file_size_converter";
 import { getFilesByUserId } from "../database/file_repository";
 import { string } from "zod";
-import { createNewSchedule } from "../database/schedule_repository";
+import {
+  createNewSchedule,
+  getAllSchedulesByUsername,
+} from "../database/schedule_repository";
+import { error } from "console";
 
 const base_directory = config.get("base_directory");
 
@@ -90,6 +94,27 @@ export function retrieveDirectories(
       callback(new CustomResponse(401, "User is not registered", {}));
     }
   });
+}
+
+export function retrieveSchedules(username: string, callback: Function) {
+  if (username) {
+    getAllSchedulesByUsername(username, (response: MySQLResponse) => {
+      if (response.error) {
+        console.error(response.error);
+        
+        log.error(`An error occurred ... ${response.error}`);
+        callback(new CustomResponse(500, "System failure. Try again", {}));
+      } else {
+        log.info(
+          `Successfully retrieved the schedule downloads for ${username} ...`
+        );
+        callback(new CustomResponse(200, "", response.results));
+      }
+    });
+  } else {
+    console.error("Username is not provided");
+    callback(new CustomResponse(400, "Username is not provided", {}));
+  }
 }
 
 export function scheduleDownload(
