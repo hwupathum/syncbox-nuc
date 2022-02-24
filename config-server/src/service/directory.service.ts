@@ -11,6 +11,7 @@ import { getFilesByUserId } from "../database/file_repository";
 import { string } from "zod";
 import {
   createNewSchedule,
+  deleteScheduleById,
   getAllSchedulesByUsername,
 } from "../database/schedule_repository";
 import { error } from "console";
@@ -100,8 +101,6 @@ export function retrieveSchedules(username: string, callback: Function) {
   if (username) {
     getAllSchedulesByUsername(username, (response: MySQLResponse) => {
       if (response.error) {
-        console.error(response.error);
-        
         log.error(`An error occurred ... ${response.error}`);
         callback(new CustomResponse(500, "System failure. Try again", {}));
       } else {
@@ -205,3 +204,27 @@ const scheduleAllFilesInDirectory = (
     return { error, result: null };
   }
 };
+
+export function deleteSchedules(
+  ids: string,
+  callback: Function
+) {
+  if (ids) {
+    deleteScheduleById(ids, (response: MySQLResponse) => {
+      if (response.error) {
+        log.error(`An error occurred ... ${response.error}`);
+        callback(new CustomResponse(500, "System failure. Try again", {}));
+      } else {
+        log.info(
+          `Successfully deleted the schedule downloads ${ids} ...`
+        );
+        callback(new CustomResponse(200, "", response.results));
+      }
+    });
+  } else {
+    console.error("Schedule IDs not provided");
+    callback(
+      new CustomResponse(400, "Schedule IDs not provided", {})
+    );
+  }
+}

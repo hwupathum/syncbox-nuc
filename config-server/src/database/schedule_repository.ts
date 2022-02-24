@@ -27,8 +27,8 @@ export function getAllSchedulesByUsername(username: string, callback: Function) 
   );
 }
 
-export function deleteScheduleById(schedule_id: number, callback: Function) {
-  let sql_query = `DELETE FROM schedules WHERE schedule_id = ${schedule_id}`;
+export function deleteScheduleById(schedule_ids: string, callback: Function) {
+  let sql_query = `DELETE FROM schedules WHERE schedule_id IN (${schedule_ids})`;
   connection.query(sql_query, (error, result, fields) =>
     callback(new MySQLResponse(error, result, fields))
   );

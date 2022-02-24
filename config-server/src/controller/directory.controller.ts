@@ -1,7 +1,12 @@
 import { Request, Response } from "express";
 import { CustomResponse } from "../custom_response.ts";
 // import { RetrieveDirectoriesInput } from "../schema/files.schema";
-import { retrieveDirectories, retrieveSchedules, scheduleDownload } from "../service/directory.service";
+import {
+  deleteSchedules,
+  retrieveDirectories,
+  retrieveSchedules,
+  scheduleDownload,
+} from "../service/directory.service";
 
 export async function retrieveDirectoriesHandler(req: Request, res: Response) {
   const username = req.query.username;
@@ -22,12 +27,9 @@ export async function retrieveDirectoriesHandler(req: Request, res: Response) {
 export async function retrieveSchedulesHandler(req: Request, res: Response) {
   const username = req.query.username;
   try {
-    retrieveSchedules(
-      `${username}`,
-      (response: CustomResponse) => {
-        res.send(response);
-      }
-    );
+    retrieveSchedules(`${username}`, (response: CustomResponse) => {
+      res.send(response);
+    });
   } catch (error) {
     res.send(new CustomResponse(500, "System failure. Try again", {}));
   }
@@ -48,6 +50,18 @@ export async function scheduleDownloadHandler(req: Request, res: Response) {
         res.send(response);
       }
     );
+  } catch (error) {
+    res.send(new CustomResponse(500, "System failure. Try again", {}));
+  }
+}
+
+export async function deleteScheduleHandler(req: Request, res: Response) {
+  const ids = req.query.ids;
+
+  try {
+    deleteSchedules(`${ids}`, (response: CustomResponse) => {
+      res.send(response);
+    });
   } catch (error) {
     res.send(new CustomResponse(500, "System failure. Try again", {}));
   }
