@@ -21,7 +21,7 @@ export default function DirectoryTile(props) {
     return (<>
         <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }} >
             <TableCell>
-                <Checkbox checked={data.checked} onChange={data.handleChange} />
+                <Checkbox color='primary' checked={data.checked} onChange={data.handleChange} />
             </TableCell>
             <TableCell align="right">{!folder ? getFileTypeIcon(data.type) : <FolderIcon color='primary'/>}</TableCell>
             <TableCell component="th" scope="row">
@@ -32,7 +32,7 @@ export default function DirectoryTile(props) {
             <TableCell align="right">{getSyncStatus(data.last_synced, data.last_updated)}</TableCell>
             <TableCell align="center">
                 {!data.checked && <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)} >
-                    {open ? <CancelIcon /> : <DownloadIcon />}
+                    {open ? <CancelIcon color='primary' /> : <DownloadIcon color='primary' />}
                 </IconButton>}
             </TableCell>
         </TableRow>

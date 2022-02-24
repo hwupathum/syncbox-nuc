@@ -46,10 +46,8 @@ const ResponsiveAppBar = ({ token, deleteToken }) => {
         <AppBar position="static" elevation={0}>
             <Container maxWidth="md">
                 <Toolbar disableGutters>
-                    <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }} >
-                        <Link sx={{ my: 2, color: 'white', display: 'block' }} href={"/data"} underline="none" color={"black !important"}>{"SYNCBOX"}</Link>
-                    </Typography>
-                    {/* <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+                    <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }} >SYNCBOX</Typography>
+                    <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
                         <IconButton size="large" aria-label="account of current user" aria-controls="menu-appbar" aria-haspopup="true" onClick={handleOpenNavMenu} color="inherit" >
                             <MenuIcon />
                         </IconButton>
@@ -66,7 +64,7 @@ const ResponsiveAppBar = ({ token, deleteToken }) => {
                                 </MenuItem>
                             ))}
                         </Menu>
-                    </Box> */}
+                    </Box>
                     {token?.user ? <Box sx={{ flexGrow: 0 }}>
                         <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                             <Avatar alt={token?.user ? token.user : "Remy Sharp"} src="/static/images/avatar/2.jpg" />
