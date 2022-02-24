@@ -13,12 +13,11 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
 import { base_url } from '../App';
 import { useHistory, useLocation } from 'react-router-dom';
-import Objectives from '../Objectives';
 
 const AuthPage = ({ setToken }) => {
     let history = useHistory();
     let location = useLocation();
-    let { from } = { from: { pathname: "/data/" } };
+    let { from } = location.state || { from: { pathname: "/data/" } };
     let [username, setUsername] = useState();
     let [password, setPassword] = useState();
     let [error, setError] = useState();

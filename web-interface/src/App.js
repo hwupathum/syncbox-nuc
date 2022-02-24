@@ -5,10 +5,9 @@ import axios from "axios";
 import useToken from "./auth/Token";
 import DashboardPage from "./dashboard/DashboardPage";
 import ResponsiveAppBar from "./ResponsiveAppBar";
-import LandingPage from "./dashboard/LandingPage";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { purple } from "@mui/material/colors";
-import AuthPage from "./dashboard/AuthPage";
+import AuthPage from "./auth/AuthPage";
+import SchedulesPage from "./dashboard/SchedulesPage";
 
 const theme = createTheme({
   palette: {
@@ -45,7 +44,9 @@ export default function App() {
           <PrivateRoute path="/data/*">
             <DashboardPage />
           </PrivateRoute>
-          {/* <Route path="/"><LandingPage setToken={saveToken} /></Route> */}
+          <PrivateRoute path="/schedules">
+            <SchedulesPage />
+          </PrivateRoute>
         </Switch>
       </Router>
     </ThemeProvider>

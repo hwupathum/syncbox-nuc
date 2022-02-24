@@ -47,7 +47,7 @@ export default function DashboardPage() {
     if (token?.user && filename && startDate && startTime) {
       return axios
         .post(
-          `${base_url}/schedule?username=${token.user}&filenames=${location}/${filename}&day=${startDate}&time=${startTime}`
+          `${base_url}/schedules?username=${token.user}&filenames=${location}/${filename}&day=${startDate}&time=${startTime}`
         )
         .then((response) => {
           if (response.data?.status === 200) {
@@ -148,7 +148,7 @@ export default function DashboardPage() {
             >
               <TableHead>
                 <TableRow>
-                  <StyledTableCell>
+                  <StyledTableCell width={80}>
                     <Checkbox
                       color="primary"
                       value="all"

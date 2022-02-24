@@ -4,6 +4,6 @@ import useToken from "./Token";
 export default function PrivateRoute({ children, ...rest }) {
     const { token } = useToken();
     return (
-        <Route {...rest} render={({ location }) => token ? (children) : (<Redirect to={{ pathname: "/login", state: { from: location } }} />)} />
+        <Route {...rest} render={({ location }) => token ? (children) : (<Redirect to={{ pathname: "/", state: { from: location } }} />)} />
     );
 }
