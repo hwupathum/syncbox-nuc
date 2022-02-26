@@ -63,6 +63,34 @@ export default function SchedulesPage() {
     }
   };
 
+  const clearEntry = (schedule_ids) => {
+    if (schedule_ids) {
+      let url = `${base_url}/schedules?ids=${schedule_ids}`;
+      axios
+        .delete(url)
+        .then((response) => {
+          if (response.data?.status === 200) {
+            let tmp = [];
+            const splitted = schedule_ids.toString().split(", ");
+            schedules.forEach((schedule) => {
+              if (splitted.indexOf(schedule.schedule_id.toString()) == -1) {
+                tmp.push(schedule);
+              }
+            });
+            setSchedules(tmp);
+            setAllSelected(false);
+            setAlertContent("Successfully removed the selected files");
+            setAlertType("danger");
+            setShowAlert(true);
+            setChecked([]);
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    }
+  };
+
   const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
       //   backgroundColor: theme.palette.common.black,
@@ -167,22 +195,3 @@ async function getUserScheduleDownloads(username) {
     });
 }
 
-function clearEntry(schedule_ids) {
-  if (schedule_ids) {
-    let url = `${base_url}/schedules?ids=${schedule_ids}`;
-    return axios
-      .delete(url)
-      .then((response) => {
-        if (response.data?.status === 200) {
-          return response.data?.data;
-        } else {
-          console.error(new Error(response.data?.message));
-          return new Error(response.data?.message);
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        return error;
-      });
-  }
-}
