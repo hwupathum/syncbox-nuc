@@ -20,8 +20,34 @@ export function getAllSchedules(callback: Function) {
   );
 }
 
-export function getAllSchedulesByUsername(username: string, callback: Function) {
+export function getAllSchedulesByUsername(
+  username: string,
+  callback: Function
+) {
   let sql_query = `SELECT * FROM schedules WHERE user_id = (SELECT user_id FROM users WHERE username = '${username}')`;
+  connection.query(sql_query, (error, result, fields) =>
+    callback(new MySQLResponse(error, result, fields))
+  );
+}
+
+export function getScheduleByFilePath(
+  username: string,
+  path: string,
+  callback: Function
+) {
+  let sql_query = `SELECT * FROM schedules WHERE full_path = '${path}' AND user_id = (SELECT user_id FROM users WHERE username = '${username}')`;
+  connection.query(sql_query, (error, result, fields) =>
+    callback(new MySQLResponse(error, result, fields))
+  );
+}
+
+export function updateScheduledTime(
+  username: string,
+  path: string,
+  time: string,
+  callback: Function
+) {
+  let sql_query = `UPDATE schedules SET start_time = '${time}' WHERE user_id = (SELECT user_id FROM users WHERE username = '${username}') AND full_path = '${path}'`;
   connection.query(sql_query, (error, result, fields) =>
     callback(new MySQLResponse(error, result, fields))
   );

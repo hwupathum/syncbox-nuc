@@ -73,14 +73,14 @@ export default function SchedulesPage() {
             let tmp = [];
             const splitted = schedule_ids.toString().split(", ");
             schedules.forEach((schedule) => {
-              if (splitted.indexOf(schedule.schedule_id.toString()) == -1) {
+              if (splitted.indexOf(schedule.schedule_id.toString()) === -1) {
                 tmp.push(schedule);
               }
             });
             setSchedules(tmp);
             setAllSelected(false);
             setAlertContent("Successfully removed the selected files");
-            setAlertType("danger");
+            setAlertType("success");
             setShowAlert(true);
             setChecked([]);
           }

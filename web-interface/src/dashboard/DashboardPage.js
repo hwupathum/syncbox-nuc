@@ -182,7 +182,7 @@ export default function DashboardPage() {
               <ScheduleTile
                 open={open}
                 submit={handleScheduleDownload}
-                filename={checked.join(", ")}
+                filename={checked.join(`, ${location}/`)}
                 selected={checked}
               ></ScheduleTile>
               <TableBody>

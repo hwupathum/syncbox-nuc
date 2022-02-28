@@ -13,6 +13,8 @@ import {
   createNewSchedule,
   deleteScheduleById,
   getAllSchedulesByUsername,
+  getScheduleByFilePath,
+  updateScheduledTime,
 } from "../database/schedule_repository";
 import { error } from "console";
 
@@ -183,20 +185,39 @@ const scheduleAllFilesInDirectory = (
         }
       );
     } else {
-      createNewSchedule(
-        username,
-        filename,
-        time_string,
-        (response: MySQLResponse) => {
-          if (response.error) {
-            return { error: response.error, result: null };
-          } else {
-            log.info(
-              `File ${filename} of ${username} was scheduled for download on ${time_string} ...`
-            );
-          }
+      getScheduleByFilePath(username, filename, (response: MySQLResponse) => {
+        if (response.error) {
+          return { error: response.error, result: null };
+        } else if (response.results?.length === 0) {
+          createNewSchedule(
+            username,
+            filename,
+            time_string,
+            (response: MySQLResponse) => {
+              if (response.error) {
+                return { error: response.error, result: null };
+              } else {
+                log.info(
+                  `File ${filename} of ${username} was scheduled for download on ${time_string} ...`
+                );
+              }
+            }
+          );
+        } else if (response.results?.length > 0) {
+          updateScheduledTime(
+            username,
+            filename,
+            time_string,
+            (response: MySQLResponse) => {if (response.error) {
+              return { error: response.error, result: null };
+            } else {
+              log.info(
+                `File ${filename} of ${username} was scheduled for download on ${time_string} ...`
+              );
+            }}
+          );
         }
-      );
+      });
     }
     return { error: null, result: true };
   } catch (error) {
