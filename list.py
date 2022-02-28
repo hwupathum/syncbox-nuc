@@ -10,10 +10,9 @@ def updatelog(username, filename, path, parent):
             for name in files:
                 full_path = os.path.join(path, name)
                 info = os.stat(full_path)
-                info_tuple = (username, datetime.date(datetime.now()), full_path.replace(parent, ""), info.st_size, datetime.fromtimestamp(info.st_mtime).isoformat(sep=' ', timespec='milliseconds'), info.st_atime, info.st_ino)
+                info_tuple = (username, datetime.date(datetime.now()), full_path.replace(parent, ""), info.st_size, int(info.st_mtime), info.st_atime, info.st_ino)
                 file_object.write("\t".join(map(str,info_tuple)))
                 file_object.write("\n")
-
 
 mydb = mysql.connector.connect(
     host="localhost",

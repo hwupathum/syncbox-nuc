@@ -65,7 +65,6 @@ export function retrieveDirectories(
                   const result_names = response.results.map(
                     (result: any) => result.full_path
                   );
-
                   files.forEach((file: any) => {
                     let index = result_names.indexOf(
                       `${location}/${file.name}`
@@ -205,26 +204,19 @@ const scheduleAllFilesInDirectory = (
   }
 };
 
-export function deleteSchedules(
-  ids: string,
-  callback: Function
-) {
+export function deleteSchedules(ids: string, callback: Function) {
   if (ids) {
     deleteScheduleById(ids, (response: MySQLResponse) => {
       if (response.error) {
         log.error(`An error occurred ... ${response.error}`);
         callback(new CustomResponse(500, "System failure. Try again", {}));
       } else {
-        log.info(
-          `Successfully deleted the schedule downloads ${ids} ...`
-        );
+        log.info(`Successfully deleted the schedule downloads ${ids} ...`);
         callback(new CustomResponse(200, "", response.results));
       }
     });
   } else {
     console.error("Schedule IDs not provided");
-    callback(
-      new CustomResponse(400, "Schedule IDs not provided", {})
-    );
+    callback(new CustomResponse(400, "Schedule IDs not provided", {}));
   }
 }

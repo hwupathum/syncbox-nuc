@@ -174,7 +174,7 @@ export default function DashboardPage() {
                   <StyledTableCell></StyledTableCell>
                   <StyledTableCell>Name</StyledTableCell>
                   <StyledTableCell align="right">Size</StyledTableCell>
-                  <StyledTableCell align="right">Last Updated</StyledTableCell>
+                  <StyledTableCell align="right">Last Accessed</StyledTableCell>
                   <StyledTableCell align="right">Status</StyledTableCell>
                   <StyledTableCell></StyledTableCell>
                 </TableRow>
@@ -213,8 +213,7 @@ export default function DashboardPage() {
                     size: file.size,
                     type: file.extension,
                     checked: checked.includes(file.name) || allSelected,
-                    last_updated: file.access_time,
-                    last_synced: file.synced_time,
+                    last_synced: file.access_time,
                     handleChange: (e) => handleSelect(e, file.name),
                   };
                   return (
