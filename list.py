@@ -4,22 +4,22 @@ import os
 from datetime import datetime
 import mysql.connector
 
-def updatelog(username, filename, path):
+def updatelog(username, filename, path, parent):
     with open(filename, "a", encoding="utf-8", errors="backslashreplace") as file_object:
         for path, subdirs, files in os.walk(path):
             for name in files:
                 full_path = os.path.join(path, name)
                 info = os.stat(full_path)
-                info_tuple = (username, datetime.date(datetime.now()), full_path, info.st_size, info.st_mtime, info.st_atime, info.st_ino)
+                info_tuple = (username, datetime.date(datetime.now()), full_path.replace(parent, ""), info.st_size, datetime.fromtimestamp(info.st_mtime).isoformat(sep=' ', timespec='milliseconds'), info.st_atime, info.st_ino)
                 file_object.write("\t".join(map(str,info_tuple)))
                 file_object.write("\n")
 
 
 mydb = mysql.connector.connect(
     host="localhost",
-    user="root",
-    password="secret",
-    port="3308",
+    user="syncbox",
+    password="Secret@123",
+    port="3306",
     database="syncbox"
 )
 
@@ -33,4 +33,4 @@ filename = datetime.now().strftime("%Y-%m-%d.log")
 
 for x in myresult:
     print(x)
-    # updatelog("udara", filename, "/home/udara/Documents/FYP/")
+    updatelog(x[0], filename, x[1], x[1])
