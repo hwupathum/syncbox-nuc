@@ -12,7 +12,9 @@ import { updateFileSyncedTime } from "../database/file_repository";
 import { MySQLResponse } from "../model/mysql_response.model";
 import log from "../utils/logger";
 
+const spawn = require("child_process").spawn;
 const base_directory = config.get("base_directory");
+const logger_script: string = config.get("logger_script");
 
 export function mountDirectoriesForSavedUsers() {
   getAllUsers((response: MySQLResponse) => {
@@ -93,5 +95,12 @@ export function dowloadScheduledFiles() {
         });
       }
     });
+  });
+}
+
+export function logFileAccessHistory() {
+  cron.schedule("0 0 * * *", () => {
+    spawn("python3", [logger_script]);
+    log.info("Logged the file access history ...");
   });
 }

@@ -11,6 +11,7 @@ import connectToMySQLDatabase from "./utils/mysql_connection";
 import router from "./routes";
 import {
   dowloadScheduledFiles,
+  logFileAccessHistory,
   mountDirectoriesForSavedUsers,
 } from "./system_utils/start";
 
@@ -51,4 +52,5 @@ app.listen(server_port, () => {
   connectToMySQLDatabase();
   mountDirectoriesForSavedUsers();
   dowloadScheduledFiles();
+  logFileAccessHistory();
 });

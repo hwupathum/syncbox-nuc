@@ -2,6 +2,7 @@ export default {
   server_port: 1905,
   log_level: "info",
   base_directory: "/srv/syncbox",
+  logger_script: "../list.py",
   seafile_host: "http://www.nextbox.lk:8081",
   mysql_host: "localhost",
   mysql_port: 3306,
