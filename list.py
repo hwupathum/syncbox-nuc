@@ -3,6 +3,7 @@
 import os
 from datetime import datetime
 import mysql.connector
+import requests
 
 def updatelog(id, username, filename, path, parent):
     mycursor.execute("SELECT full_path, access_time FROM files WHERE user_id = " + str(id))
@@ -17,7 +18,13 @@ def updatelog(id, username, filename, path, parent):
             for name in files:
                 full_path = os.path.join(path, name)
                 info = os.stat(full_path)
-                info_tuple = (username, datetime.date(datetime.now()), full_path.replace(parent, ""), info.st_size, int(info.st_mtime), files_dic[full_path.replace(parent, "")], info.st_ino)
+
+                try:
+                    modified = files_dic[full_path.replace(parent, "")]
+                except:
+                    modified = 0
+
+                info_tuple = (username, datetime.date(datetime.now()), full_path.replace(parent, ""), info.st_size, int(info.st_mtime), modified, info.st_ino)
                 file_object.write("\t".join(map(str,info_tuple)))
                 file_object.write("\n")
 
@@ -40,3 +47,8 @@ filename = datetime.now().strftime("%Y-%m-%d.log")
 for id, user, scope in users:
     print(id, user, scope)
     updatelog(id, user, filename, scope, scope)
+
+endpoint = "http://localhost:1904/updateLogs"
+data = {'file': filename, 'date': datetime.now()}
+response = requests.post(url = endpoint, data = data)
+print(response)
