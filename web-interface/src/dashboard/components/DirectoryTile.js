@@ -14,6 +14,11 @@ import Checkbox from "@mui/material/Checkbox";
 import ScheduleTile from "./ScheduleTile";
 import FolderIcon from "@mui/icons-material/Folder";
 
+Date.prototype.addHours = function (h) {
+  this.setTime(this.getTime() + h * 60 * 60 * 1000);
+  return this;
+};
+
 export default function DirectoryTile(props) {
   let { data, submit, folder = false } = props;
   let synced_time;
@@ -21,6 +26,7 @@ export default function DirectoryTile(props) {
 
   if (data.last_synced) {
     synced_time = new Date(data.last_synced);
+    synced_time.addHours(5.5);
   }
 
   return (
