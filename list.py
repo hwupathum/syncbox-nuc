@@ -24,7 +24,7 @@ def updatelog(id, username, filename, path, parent):
                 except:
                     modified = 0
 
-                info_tuple = (username, datetime.date(datetime.now()), full_path.replace(parent, ""), info.st_size, int(info.st_mtime), modified, info.st_ino)
+                info_tuple = (username, datetime.date(datetime.now()).strftime("%m/%d/%Y.log"), full_path.replace(parent, ""), info.st_size, int(info.st_mtime), modified, info.st_ino)
                 file_object.write("\t".join(map(str,info_tuple)))
                 file_object.write("\n")
 

@@ -185,6 +185,7 @@ const scheduleAllFilesInDirectory = (
         }
       );
     } else {
+      filename = filename.replace(/^\/+/, "/");
       getScheduleByFilePath(username, filename, (response: MySQLResponse) => {
         if (response.error) {
           return { error: response.error, result: null };
@@ -208,13 +209,15 @@ const scheduleAllFilesInDirectory = (
             username,
             filename,
             time_string,
-            (response: MySQLResponse) => {if (response.error) {
-              return { error: response.error, result: null };
-            } else {
-              log.info(
-                `File ${filename} of ${username} was scheduled for download on ${time_string} ...`
-              );
-            }}
+            (response: MySQLResponse) => {
+              if (response.error) {
+                return { error: response.error, result: null };
+              } else {
+                log.info(
+                  `File ${filename} of ${username} was scheduled for download on ${time_string} ...`
+                );
+              }
+            }
           );
         }
       });
