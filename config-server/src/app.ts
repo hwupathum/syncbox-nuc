@@ -22,7 +22,7 @@ declare module "express-session" {
 }
 
 const app = express();
-app.use(cors({ credentials: true, origin: `http://${ip.address()}:3000` }));
+app.use(cors({ credentials: true, origin: true }));
 const server_port = config.get<number>("server_port");
 
 app.use(cookieParser());
