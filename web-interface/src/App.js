@@ -25,7 +25,7 @@ const theme = createTheme({
   },
 });
 
-export const base_url = "http://localhost:1905/api";
+export const base_url = `${window.location.href.split(":3000")[0]}:1905/api`;
 
 export default function App() {
   axios.defaults.withCredentials = true;
