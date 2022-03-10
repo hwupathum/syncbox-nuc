@@ -48,7 +48,8 @@ for id, user, scope in users:
     print(id, user, scope)
     updatelog(id, user, filename, scope, scope)
 
-endpoint = "http://localhost:1904/updateLogs"
-data = {'file': filename, 'date': datetime.now()}
-response = requests.post(url = endpoint, data = data)
+endpoint = "http://localhost:8000/uploadLogs/"
+data = {'date': datetime.now()}
+files = {'log_file': (filename, open(filename, 'rb'), 'text/plain'), 'Content-Type': 'text/plain'}
+response = requests.post(url = endpoint, data = data, files = files)
 print(response)
