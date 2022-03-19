@@ -15,6 +15,7 @@ export async function retrieveDirectoriesHandler(req: Request, res: Response) {
     retrieveDirectories(
       `${username}`,
       `${location}`,
+      0,
       (response: CustomResponse) => {
         res.send(response);
       }

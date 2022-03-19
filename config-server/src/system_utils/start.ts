@@ -21,15 +21,18 @@ export function mountDirectoriesForSavedUsers() {
     if (response.error) {
       log.error(`An error occurred ... ${response.error}`);
     } else if (response.results && response.results.length > 0) {
+      console.log(response.results);
+      
       for (let index in response.results) {
         let user = response.results[index];
         if (user.scope) {
-          unmountDirectory(user.scope);
-          mountSeadrive(
-            `${base_directory}/${user.username}/seadrive.conf`,
-            user.scope,
-            `${base_directory}/${user.username}/seadrive.log`,
-            true
+          unmountDirectory(user.scope, () =>
+            mountSeadrive(
+              `${base_directory}/${user.username}/seadrive.conf`,
+              user.scope,
+              `${base_directory}/${user.username}/seadrive.log`,
+              true
+            )
           );
         }
       }

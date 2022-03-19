@@ -1,5 +1,5 @@
 import { MySQLResponse } from "../model/mysql_response.model";
-import connection from "./connection";
+import connection from "../utils/mysql_connection";
 
 export function createNewSchedule(
   username: string,

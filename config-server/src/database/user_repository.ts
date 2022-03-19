@@ -1,6 +1,5 @@
-import { CustomResponse } from "../custom_response.ts";
 import { MySQLResponse } from "../model/mysql_response.model";
-import connection from "./connection";
+import connection from "../utils/mysql_connection";
 
 export function addNewUser(
   username: string,

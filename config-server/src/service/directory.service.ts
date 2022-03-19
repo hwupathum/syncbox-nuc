@@ -17,12 +17,15 @@ import {
   updateScheduledTime,
 } from "../database/schedule_repository";
 import { error } from "console";
+import unmountDirectory from "../system_utils/unmountDirectory";
+import mountSeadrive from "../seafile_utils/mount_seadrive";
 
 const base_directory = config.get("base_directory");
 
 export function retrieveDirectories(
   username: string,
   location: string | null,
+  times: number,
   callback: Function
 ) {
   getUserByUsername(username, (response: MySQLResponse) => {
@@ -42,7 +45,19 @@ export function retrieveDirectories(
       fs.readdir(directory, "utf8", (error, content) => {
         if (error) {
           log.error(`An error occurred ... ${error.message}`);
-          callback(new CustomResponse(500, "System failure. Try again", {}));
+          if (times > 0) {
+            callback(new CustomResponse(500, "System failure. Try again", {}));
+          } else {
+            unmountDirectory(`${base_directory}/${user.username}/data`, () => {
+              mountSeadrive(
+                `${base_directory}/${user.username}/seadrive.conf`,
+                `${base_directory}/${user.username}/data`,
+                `${base_directory}/${user.username}/seadrive.log`,
+                true
+              );
+            });
+            retrieveDirectories(username, location, 1, callback);
+          }
         } else {
           const directories: any = [];
           const files: any = [];

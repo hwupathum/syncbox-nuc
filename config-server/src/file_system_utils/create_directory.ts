@@ -8,6 +8,6 @@ export default function createDirectory(directory_name: string) {
     fs.mkdirSync(`${directory_name}`, { recursive: true });
   } else {
     log.error(`${directory_name} already exists ...`);
-    unmountDirectory(directory_name);
+    unmountDirectory(directory_name, () => {});
   }
 }

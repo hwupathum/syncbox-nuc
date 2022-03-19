@@ -7,13 +7,13 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import config from "config";
 import log from "./utils/logger";
-import connectToMySQLDatabase from "./utils/mysql_connection";
 import router from "./routes";
 import {
   dowloadScheduledFiles,
   logFileAccessHistory,
   mountDirectoriesForSavedUsers,
 } from "./system_utils/start";
+import { connectToMySQLDatabase } from "./utils/mysql_connection";
 
 declare module "express-session" {
   export interface SessionData {

@@ -1,5 +1,5 @@
 import { MySQLResponse } from "../model/mysql_response.model";
-import connection from "./connection";
+import connection from "../utils/mysql_connection";
 
 export function getFilesByUserId(
   username: any,
@@ -22,3 +22,5 @@ export function updateFileSyncedTime(
     callback(new MySQLResponse(error, result, fields))
   );
 }
+
+
