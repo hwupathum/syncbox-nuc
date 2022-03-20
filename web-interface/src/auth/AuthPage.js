@@ -31,6 +31,7 @@ const AuthPage = ({ setToken }) => {
                 if (response.data?.status === 200) {
                     setToken({ token: response.data.data, user: username });
                     history.replace(from);
+                    window.location.reload(false);
                 } else {
                     console.error(new Error(response.data?.message));
                     setError(response.data?.message);
