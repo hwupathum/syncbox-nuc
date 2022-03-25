@@ -15,8 +15,8 @@ import { useState } from 'react';
 
 export default function ScheduleTile(props) {
     const { filename, open, selected, submit } = props;
-    const [date, setDate] = useState(new Date('2014-08-18T00:00:00'));
-    const [time, setTime] = useState(new Date('2014-08-18T00:00:00'));
+    const [date, setDate] = useState(new Date());
+    const [time, setTime] = useState(new Date());
 
     const handleSubmit = e => {
         e.preventDefault();
@@ -42,7 +42,7 @@ export default function ScheduleTile(props) {
                                     label="Select Date"
                                     inputFormat="MM/dd/yyyy"
                                     value={date}
-                                    onChange={(value) => setDate(value)}
+                                    onChange={(value) => setDate(value + 1)}
                                     renderInput={(params) => <TextField {...params} />}
                                 />
                                 <TimePicker
