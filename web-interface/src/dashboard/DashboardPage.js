@@ -4,6 +4,8 @@ import Container from "@mui/material/Container";
 import Table from "@mui/material/Table";
 import TableHead from "@mui/material/TableHead";
 import TableBody from "@mui/material/TableBody";
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
 import TableRow from "@mui/material/TableRow";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import Checkbox from "@mui/material/Checkbox";
@@ -27,6 +29,7 @@ export default function DashboardPage() {
   const [open, setOpen] = useState(false);
   const [allSelected, setAllSelected] = useState(false);
   const [checked, setChecked] = useState([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const { token } = useToken();
   let location = decodeURI(window.location.pathname.substr(6));
@@ -36,6 +39,7 @@ export default function DashboardPage() {
       getUserDirectories(token.user, location)
         .then((response) => {
           setFileData(response.data);
+          setIsLoaded(true);
         })
         .catch((error) => {
           console.error(error);
@@ -126,6 +130,13 @@ export default function DashboardPage() {
       fontSize: 14,
     },
   }));
+  if (!isLoaded) {
+    return(
+      <Box sx={{ display: 'flex' }}>
+      <CircularProgress />
+    </Box>
+    );
+  }
 
   return (
     <div>
