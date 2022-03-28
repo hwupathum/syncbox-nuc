@@ -16,7 +16,7 @@ export default function configFileTemplate(
  client_name = ${client}
  
  [cache]
- size_limit = 1GB
+ size_limit = 100GB
  clean_cache_interval = 10
  `;
 }

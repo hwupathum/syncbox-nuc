@@ -16,7 +16,6 @@ import {
   getScheduleByFilePath,
   updateScheduledTime,
 } from "../database/schedule_repository";
-import { error } from "console";
 import unmountDirectory from "../system_utils/unmountDirectory";
 import mountSeadrive from "../seafile_utils/mount_seadrive";
 

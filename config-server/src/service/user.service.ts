@@ -20,6 +20,7 @@ import mountSeadrive from "../seafile_utils/mount_seadrive";
 import { comparePassword, hashPassword } from "../security/bcrypt";
 import { BcryptResponse } from "../model/bcrypt_response.model";
 import updateSeafileConfigurationFile from "../seafile_utils/update_config";
+import getDirectoryHash from "../seafile_utils/get_directory_hash";
 
 const base_directory = config.get("base_directory");
 
@@ -77,31 +78,42 @@ export function createUser(input: Partial<User>, callback: Function) {
                     new CustomResponse(500, "System failure. Try again", {})
                   );
                 } else if (response.hash) {
-                  addNewUser(
-                    username,
+                  getDirectoryHash(
+                    opt.token,
                     response.hash,
-                    `${user_directory}/data`,
-                    (response: MySQLResponse) => {
-                      if (response.error) {
-                        log.error(
-                          `An error occurred ... ${response.error.message}`
-                        );
-                        callback(
-                          new CustomResponse(
-                            500,
-                            "User saving failed. Try again",
-                            {}
-                          )
-                        );
-                      } else {
-                        log.info(`Successfully logged in ...`);
-                        callback(
-                          new CustomResponse(200, "", {
-                            username,
-                            token: opt.token,
-                          })
-                        );
+                    (password: string, response: string) => {
+                      let path_hash = "";
+                      if (response) {
+                        path_hash = JSON.parse(response)[0].id;
                       }
+                      addNewUser(
+                        username,
+                        password,
+                        `${user_directory}/data`,
+                        path_hash,
+                        (response: MySQLResponse) => {
+                          if (response.error) {
+                            log.error(
+                              `An error occurred ... ${response.error.message}`
+                            );
+                            callback(
+                              new CustomResponse(
+                                500,
+                                "User saving failed. Try again",
+                                {}
+                              )
+                            );
+                          } else {
+                            log.info(`Successfully logged in ...`);
+                            callback(
+                              new CustomResponse(200, "", {
+                                username,
+                                token: opt.token,
+                              })
+                            );
+                          }
+                        }
+                      );
                     }
                   );
                 }

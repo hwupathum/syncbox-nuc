@@ -5,12 +5,13 @@ export function addNewUser(
   username: string,
   password: string,
   scope: string,
+  path_hash: string,
   callback: Function
 ) {
   let sql_query = "INSERT INTO users SET ?";
   connection.query(
     sql_query,
-    { username, password, scope },
+    { username, password, scope, path_hash },
     (error, result, fields) =>
       callback(new MySQLResponse(error, result, fields))
   );
