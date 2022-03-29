@@ -22,6 +22,7 @@ import ScheduleTile from "./components/ScheduleTile";
 import { styled } from "@mui/material/styles";
 
 export default function DashboardPage() {
+
   const [fileData, setFileData] = useState({});
   const [alertContent, setAlertContent] = useState();
   const [alertType, setAlertType] = useState("success");
@@ -30,6 +31,7 @@ export default function DashboardPage() {
   const [allSelected, setAllSelected] = useState(false);
   const [checked, setChecked] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [statusIsLoaded, setStatusIsLoaded] = useState(false);
 
   const { token } = useToken();
   let location = decodeURI(window.location.pathname.substr(6));
@@ -47,6 +49,13 @@ export default function DashboardPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if ((fileData?.directories?.length || fileData?.files?.length) && !statusIsLoaded) {
+      // TODO: make new request here
+      setStatusIsLoaded(true);
+    }
+  }, [isLoaded])
+  
   const handleScheduleDownload = async (filename, startDate, startTime) => {
     if (token?.user && filename && startDate && startTime) {
       return axios
