@@ -4,7 +4,7 @@ import { SeafileResponse } from "../model/seafile_response.model";
 
 const host = config.get("seafile_host");
 
-export default async function getDirectoryHash(
+export default function getDirectoryHash(
   token: string,
   password: string,
   callback: Function

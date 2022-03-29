@@ -4,7 +4,7 @@ import { SeafileResponse } from "../model/seafile_response.model";
 
 const host = config.get("seafile_host");
 
-export default async function getFileDetails(
+export default function getFileDetails(
   token: string,
   path_hash: string,
   filename: string,

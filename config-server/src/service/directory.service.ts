@@ -289,16 +289,16 @@ export function retrieveSyncDetails(
   files: string,
   callback: Function
 ) {
-  getUserByUsername(username, async (response: MySQLResponse) => {
+  getUserByUsername(username, (response: MySQLResponse) => {
     if (response.error) {
       log.error(`An error occurred ... ${response.error.message}`);
       callback(new CustomResponse(500, "System failure. Try again", {}));
     } else if (response.results && response.results.length > 0) {
       let user: User = response.results[0];
-      await getDirectoryHash(
+      getDirectoryHash(
         token,
         "",
-        async (password: string, response: SeafileResponse) => {
+        (password: string, response: SeafileResponse) => {
           const directory_details = JSON.parse(response.stdout);
           if (!user.path_hash || user.path_hash === "") {
             if (directory_details?.length > 0) {
@@ -314,62 +314,49 @@ export function retrieveSyncDetails(
             location = location.split("/").slice(3).join("/");
           }
           const output: any = [];
-          // for (const file of files.split(",")) {
-          //   await getFileDetails(
-          //     token,
-          //     directory_details[0].id,
-          //     location ? path.join(location, file) : file,
-          //     (response: SeafileResponse) => {
-          //       try {
-          //         if (response.stdout) {
-          //           const details = JSON.parse(response.stdout);
-          //           output.add(details.name, details.last_modified);
-          //         } else {
-          //           log.error(
-          //             "An error occurred ... {}",
-          //             response.error || response.stderr
-          //           );
-          //         }
-          //       } catch (e) {
-          //         log.error("An error occurred ...");
-          //       }
-          //     }
-          //   );
-          // }
 
-        const _files = files.split(",");
-
-        if (_files) {
-            const tokenPromises = _files
-                .map(async (file)  =>  {
-                  await getFileDetails(
-                    token,
-                    directory_details[0].id,
-                    location ? path.join(location, file) : file,
-                    (response: SeafileResponse) => {
-                      try {
-                        if (response.stdout) {
-                          const details = JSON.parse(response.stdout);
-                          output.add(details.name, details.last_modified);
-                        } else {
-                          log.error(
-                            "An error occurred ... {}",
-                            response.error || response.stderr
-                          );
-                        }
-                      } catch (e) {
-                        log.error("An error occurred ...");
-                      }
+          var bar = new Promise<void>((resolve, reject) => {
+            files.split(",").forEach((file) => {
+              getFileDetails(
+                token,
+                directory_details[0].id,
+                location ? path.join(location, file).split(" ").join("%20") : file.split(" ").join("%20"),
+                (response: SeafileResponse) => {
+                  try {
+                    if (response.stdout) {
+                      console.log(response.stdout);
+                      const details = JSON.parse(response.stdout);
+                      output.push({ [details.name]: details.last_modified });
+                      resolve();
+                    } else {
+                      log.error(
+                        `An error occurred ... ${
+                          response.error || response.stderr
+                        }`
+                      );
                     }
-                  );
-                });
-            await Promise.all(tokenPromises);
-        }
-          console.log(output);
-          
+                  } catch (e) {
+                    
+                    log.error(`An error occurred ... ${e}`);
+                  }
+                }
+              );
+            });
+          });
+
+          bar
+            .then(() => {
+              log.info("Updating file details ...");
+              callback(new CustomResponse(200, "", output));
+            })
+            .catch((e) => {
+              log.error(e);
+              callback(
+                new CustomResponse(500, "System failure. Try again", {})
+              );
+            });
         }
       );
-
       // updateModifiedTimes(user.path_hash, location, files);
     } else {
       log.error(`User: ${username} is not registered`);
