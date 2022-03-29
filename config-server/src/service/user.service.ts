@@ -81,10 +81,12 @@ export function createUser(input: Partial<User>, callback: Function) {
                   getDirectoryHash(
                     opt.token,
                     response.hash,
-                    (password: string, response: string) => {
+                    (password: string, response: SeafileResponse) => {
+                      const directory_details = JSON.parse(response.stdout);
+                      
                       let path_hash = "";
-                      if (response) {
-                        path_hash = JSON.parse(response)[0].id;
+                      if (directory_details.length > 0) {
+                        path_hash = JSON.parse(response.stdout)[0].id;
                       }
                       addNewUser(
                         username,

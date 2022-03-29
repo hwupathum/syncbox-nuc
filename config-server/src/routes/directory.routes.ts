@@ -3,6 +3,7 @@ import {
   deleteScheduleHandler,
   retrieveDirectoriesHandler,
   retrieveSchedulesHandler,
+  retrieveSyncDetailsHandler,
   scheduleDownloadHandler,
 } from "../controller/directory.controller";
 // import { RETRIEVE_DIRECTORIES_SCHEMA } from "../schema/files.schema";
@@ -32,6 +33,12 @@ router.delete(
   "/api/schedules",
   // validateResource(RETRIEVE_DIRECTORIES_SCHEMA),
   deleteScheduleHandler
+);
+
+router.get(
+  "/api/sync",
+  // validateResource(RETRIEVE_DIRECTORIES_SCHEMA),
+  retrieveSyncDetailsHandler
 );
 
 export default router;

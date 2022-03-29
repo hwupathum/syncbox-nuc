@@ -2,13 +2,15 @@ import { CustomResponse } from "../custom_response.ts";
 import config from "config";
 import path from "path";
 import fs from "fs";
-import { getUserByUsername } from "../database/user_repository";
+import {
+  getUserByUsername,
+  updatePathHashByUsername,
+} from "../database/user_repository";
 import { MySQLResponse } from "../model/mysql_response.model";
 import log from "../utils/logger";
 import { User } from "../model/user.model";
 import convertBytes from "../file_system_utils/file_size_converter";
 import { getFilesByUserId } from "../database/file_repository";
-import { string } from "zod";
 import {
   createNewSchedule,
   deleteScheduleById,
@@ -18,6 +20,10 @@ import {
 } from "../database/schedule_repository";
 import unmountDirectory from "../system_utils/unmountDirectory";
 import mountSeadrive from "../seafile_utils/mount_seadrive";
+import getFileDetails from "../seafile_utils/get_file_details";
+import { SeafileResponse } from "../model/seafile_response.model";
+import getDirectoryHash from "../seafile_utils/get_directory_hash";
+import { ostring } from "zod";
 
 const base_directory = config.get("base_directory");
 
@@ -257,4 +263,88 @@ export function deleteSchedules(ids: string, callback: Function) {
     console.error("Schedule IDs not provided");
     callback(new CustomResponse(400, "Schedule IDs not provided", {}));
   }
+}
+
+function updateModifiedTimes(
+  path_hash: string,
+  location: string | null,
+  files: any
+) {
+  files.forEach((file: any) => {
+    if (location) {
+      file.name = path.join(location, file.name);
+    }
+    getFileDetails("", path_hash, file, (response: SeafileResponse) => {
+      if (response.stdout) {
+        log.info(response.stdout);
+      }
+    });
+  });
+}
+
+export function retrieveSyncDetails(
+  username: string,
+  token: string,
+  location: string | null,
+  files: string,
+  callback: Function
+) {
+  getUserByUsername(username, async (response: MySQLResponse) => {
+    if (response.error) {
+      log.error(`An error occurred ... ${response.error.message}`);
+      callback(new CustomResponse(500, "System failure. Try again", {}));
+    } else if (response.results && response.results.length > 0) {
+      let user: User = response.results[0];
+      await getDirectoryHash(
+        token,
+        "",
+        async (password: string, response: SeafileResponse) => {
+          const directory_details = JSON.parse(response.stdout);
+          if (!user.path_hash || user.path_hash === "") {
+            if (directory_details?.length > 0) {
+              updatePathHashByUsername(
+                directory_details[0].id,
+                username,
+                () => {}
+              );
+              user.path_hash = directory_details[0].id;
+            }
+          }
+          if (location) {
+            location = location.split("/").slice(3).join("/");
+          }
+          const output: any = [];
+          for (const file of files.split(",")) {
+            await getFileDetails(
+              token,
+              directory_details[0].id,
+              location ? path.join(location, file) : file,
+              (response: SeafileResponse) => {
+                try {
+                  if (response.stdout) {
+                    const details = JSON.parse(response.stdout);
+                    output.add(details.name, details.last_modified);
+                  } else {
+                    log.error(
+                      "An error occurred ... {}",
+                      response.error || response.stderr
+                    );
+                  }
+                } catch (e) {
+                  log.error("An error occurred ...");
+                }
+              }
+            );
+          }
+          console.log(output);
+          
+        }
+      );
+
+      // updateModifiedTimes(user.path_hash, location, files);
+    } else {
+      log.error(`User: ${username} is not registered`);
+      callback(new CustomResponse(401, "User is not registered", {}));
+    }
+  });
 }

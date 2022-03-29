@@ -5,6 +5,7 @@ import {
   deleteSchedules,
   retrieveDirectories,
   retrieveSchedules,
+  retrieveSyncDetails,
   scheduleDownload,
 } from "../service/directory.service";
 
@@ -63,6 +64,26 @@ export async function deleteScheduleHandler(req: Request, res: Response) {
     deleteSchedules(`${ids}`, (response: CustomResponse) => {
       res.send(response);
     });
+  } catch (error) {
+    res.send(new CustomResponse(500, "System failure. Try again", {}));
+  }
+}
+
+export async function retrieveSyncDetailsHandler(req: Request, res: Response) {
+  const username = req.query.username;
+  const token = req.query.token;
+  const location = req.query.location;
+  const files = req.query.files;
+  try {
+    retrieveSyncDetails(
+      `${username}`,
+      `${token}`,
+      `${location}`,
+      `${files}`,
+      (response: CustomResponse) => {
+        res.send(response);
+      }
+    );
   } catch (error) {
     res.send(new CustomResponse(500, "System failure. Try again", {}));
   }

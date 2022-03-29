@@ -60,6 +60,17 @@ export function updateUserPasswordByUserId(
   );
 }
 
+export function updatePathHashByUsername(
+  username: string,
+  path_hash: string,
+  callback: Function
+) {
+  let sql_query = "UPDATE users SET path_hash = ? WHERE username = ?";
+  connection.query(sql_query, [path_hash, username], (error, result, fields) =>
+    callback(error, result, fields)
+  );
+}
+
 export function deleteUserById(user_id: number, callback: Function) {
   let sql_query = `DELETE FROM users WHERE user_id = ${user_id}`;
   connection.query(sql_query, (error, result, fields) =>

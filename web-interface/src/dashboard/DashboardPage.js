@@ -4,8 +4,8 @@ import Container from "@mui/material/Container";
 import Table from "@mui/material/Table";
 import TableHead from "@mui/material/TableHead";
 import TableBody from "@mui/material/TableBody";
-import CircularProgress from '@mui/material/CircularProgress';
-import Box from '@mui/material/Box';
+import CircularProgress from "@mui/material/CircularProgress";
+import Box from "@mui/material/Box";
 import TableRow from "@mui/material/TableRow";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import Checkbox from "@mui/material/Checkbox";
@@ -17,12 +17,11 @@ import AlertMessage from "./components/AlertMessage";
 import DirectoryTile from "./components/DirectoryTile";
 import IconButton from "@mui/material/IconButton";
 import DownloadIcon from "@mui/icons-material/Download";
-import CancelIcon from '@mui/icons-material/Cancel';
+import CancelIcon from "@mui/icons-material/Cancel";
 import ScheduleTile from "./components/ScheduleTile";
 import { styled } from "@mui/material/styles";
 
 export default function DashboardPage() {
-
   const [fileData, setFileData] = useState({});
   const [alertContent, setAlertContent] = useState();
   const [alertType, setAlertType] = useState("success");
@@ -50,12 +49,18 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    if ((fileData?.directories?.length || fileData?.files?.length) && !statusIsLoaded) {
-      // TODO: make new request here
+    if (
+      token?.token &&
+      token.user &&
+      (fileData?.directories?.length || fileData?.files?.length) &&
+      !statusIsLoaded
+    ) {
+      console.log(token);
+      updateSyncStatus(token.user, token.token.token, location, fileData?.files);
       setStatusIsLoaded(true);
     }
-  }, [isLoaded])
-  
+  }, [isLoaded]);
+
   const handleScheduleDownload = async (filename, startDate, startTime) => {
     if (token?.user && filename && startDate && startTime) {
       return axios
@@ -140,10 +145,10 @@ export default function DashboardPage() {
     },
   }));
   if (!isLoaded) {
-    return(
-      <Box sx={{ display: 'flex' }}>
-      <CircularProgress />
-    </Box>
+    return (
+      <Box sx={{ display: "flex" }}>
+        <CircularProgress />
+      </Box>
     );
   }
 
@@ -273,4 +278,28 @@ async function getUserDirectories(username, location) {
       console.error(error);
       return error;
     });
+}
+
+async function updateSyncStatus(username, token, location, files) {
+  if (files && files.length > 0) {
+    let url = `${base_url}/sync?username=${username}&token=${token}&location=${
+      location ?? "/"
+    }&files=${files.map(file => file.name).join(",")}`;
+    return axios
+      .get(url)
+      .then((response) => {
+        if (response.data?.status === 200) {
+          console.log(response);
+          return response.data?.data;
+        } else {
+          console.error(new Error(response.data?.message));
+          return new Error(response.data?.message);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        return error;
+      });
+      
+  }
 }
