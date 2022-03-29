@@ -314,28 +314,57 @@ export function retrieveSyncDetails(
             location = location.split("/").slice(3).join("/");
           }
           const output: any = [];
-          for (const file of files.split(",")) {
-            await getFileDetails(
-              token,
-              directory_details[0].id,
-              location ? path.join(location, file) : file,
-              (response: SeafileResponse) => {
-                try {
-                  if (response.stdout) {
-                    const details = JSON.parse(response.stdout);
-                    output.add(details.name, details.last_modified);
-                  } else {
-                    log.error(
-                      "An error occurred ... {}",
-                      response.error || response.stderr
-                    );
-                  }
-                } catch (e) {
-                  log.error("An error occurred ...");
-                }
-              }
-            );
-          }
+          // for (const file of files.split(",")) {
+          //   await getFileDetails(
+          //     token,
+          //     directory_details[0].id,
+          //     location ? path.join(location, file) : file,
+          //     (response: SeafileResponse) => {
+          //       try {
+          //         if (response.stdout) {
+          //           const details = JSON.parse(response.stdout);
+          //           output.add(details.name, details.last_modified);
+          //         } else {
+          //           log.error(
+          //             "An error occurred ... {}",
+          //             response.error || response.stderr
+          //           );
+          //         }
+          //       } catch (e) {
+          //         log.error("An error occurred ...");
+          //       }
+          //     }
+          //   );
+          // }
+
+        const _files = files.split(",");
+
+        if (_files) {
+            const tokenPromises = _files
+                .map(async (file)  =>  {
+                  await getFileDetails(
+                    token,
+                    directory_details[0].id,
+                    location ? path.join(location, file) : file,
+                    (response: SeafileResponse) => {
+                      try {
+                        if (response.stdout) {
+                          const details = JSON.parse(response.stdout);
+                          output.add(details.name, details.last_modified);
+                        } else {
+                          log.error(
+                            "An error occurred ... {}",
+                            response.error || response.stderr
+                          );
+                        }
+                      } catch (e) {
+                        log.error("An error occurred ...");
+                      }
+                    }
+                  );
+                });
+            await Promise.all(tokenPromises);
+        }
           console.log(output);
           
         }
