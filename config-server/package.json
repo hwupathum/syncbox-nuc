@@ -2,7 +2,7 @@
   "name": "webdav-client-server",
   "version": "1.0.0",
   "description": "",
-  "main": "src/server.ts",
+  "main": "src/app.ts",
   "scripts": {
     "build": "rm -rf build/ && prettier --write src/ && tsc",
     "start": "tsc && node build/src/app.js",
