@@ -30,10 +30,9 @@ export async function getFileDetailsByAxios(
     }})
 
     return results?.data;
-
+    
   } catch (e: any) {
     console.log("Get File Details error", e?.message)
+    return null;
   }
-    
-  
 }
