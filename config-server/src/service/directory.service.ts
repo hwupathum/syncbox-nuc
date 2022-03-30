@@ -20,10 +20,9 @@ import {
 } from "../database/schedule_repository";
 import unmountDirectory from "../system_utils/unmountDirectory";
 import mountSeadrive from "../seafile_utils/mount_seadrive";
-import getFileDetails from "../seafile_utils/get_file_details";
+import getFileDetailsByAxios from "../seafile_utils/get_file_details";
 import { SeafileResponse } from "../model/seafile_response.model";
 import getDirectoryHash from "../seafile_utils/get_directory_hash";
-import { ostring } from "zod";
 
 const base_directory = config.get("base_directory");
 
@@ -265,23 +264,6 @@ export function deleteSchedules(ids: string, callback: Function) {
   }
 }
 
-function updateModifiedTimes(
-  path_hash: string,
-  location: string | null,
-  files: any
-) {
-  files.forEach((file: any) => {
-    if (location) {
-      file.name = path.join(location, file.name);
-    }
-    getFileDetails("", path_hash, file, (response: SeafileResponse) => {
-      if (response.stdout) {
-        log.info(response.stdout);
-      }
-    });
-  });
-}
-
 export function retrieveSyncDetails(
   username: string,
   token: string,
@@ -298,7 +280,7 @@ export function retrieveSyncDetails(
       getDirectoryHash(
         token,
         "",
-        (password: string, response: SeafileResponse) => {
+        async (password: string, response: SeafileResponse) => {
           const directory_details = JSON.parse(response.stdout);
           if (!user.path_hash || user.path_hash === "") {
             if (directory_details?.length > 0) {
@@ -313,51 +295,33 @@ export function retrieveSyncDetails(
           if (location) {
             location = location.split("/").slice(3).join("/");
           }
-          const output: any = [];
+          const output = new Map<string, string>();
 
-          var bar = new Promise<void>((resolve, reject) => {
-            files.split(",").forEach((file) => {
-              getFileDetails(
-                token,
-                directory_details[0].id,
-                location ? path.join(location, file).split(" ").join("%20") : file.split(" ").join("%20"),
-                (response: SeafileResponse) => {
-                  try {
-                    if (response.stdout) {
-                      console.log(response.stdout);
-                      const details = JSON.parse(response.stdout);
-                      output.push({ [details.name]: details.last_modified });
-                      resolve();
-                    } else {
-                      log.error(
-                        `An error occurred ... ${
-                          response.error || response.stderr
-                        }`
-                      );
-                    }
-                  } catch (e) {
-                    
-                    log.error(`An error occurred ... ${e}`);
-                  }
-                }
+          const tokenPromises = files.split(",").map(async (file) => {
+            const response = await getFileDetailsByAxios(
+              token,
+              directory_details[0].id,
+              location
+                ? path.join(location, file).split(" ").join("%20")
+                : file.split(" ").join("%20")
+            );
+            if (response) {
+              try {
+                output.set(response.name, response.last_modified);                
+              } catch (e) {
+                log.error(`An error occurred ... ${e}`);
+              }
+            } else {
+              log.error(
+                `An error occurred ... ${response.error || response.stderr}`
               );
-            });
+            }
           });
-
-          bar
-            .then(() => {
-              log.info("Updating file details ...");
-              callback(new CustomResponse(200, "", output));
-            })
-            .catch((e) => {
-              log.error(e);
-              callback(
-                new CustomResponse(500, "System failure. Try again", {})
-              );
-            });
+          await Promise.all(tokenPromises);
+          log.info("Updating file details ...");
+          callback(new CustomResponse(200, "", Object.fromEntries(output)));
         }
       );
-      // updateModifiedTimes(user.path_hash, location, files);
     } else {
       log.error(`User: ${username} is not registered`);
       callback(new CustomResponse(401, "User is not registered", {}));

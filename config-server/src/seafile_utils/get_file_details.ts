@@ -5,20 +5,7 @@ import axios from 'axios';
 
 const host = config.get("seafile_host");
 
-export default function getFileDetails(
-  token: string,
-  path_hash: string,
-  filename: string,
-  callback: Function
-) {
-  let command: string = `curl -H 'Authorization: Token ${token}' -H 'Accept: application/json; charset=utf-8; indent=4' '${host}/api2/repos/${path_hash}/file/detail/?p=/${filename}'`;
-  exec(command, (error, stdout, stderr) => {
-    callback(new SeafileResponse(error, stdout, stderr));
-  });
-}
-
-
-export async function getFileDetailsByAxios(
+export default async function getFileDetailsByAxios(
   token: string,
   path_hash: string,
   filename: string,

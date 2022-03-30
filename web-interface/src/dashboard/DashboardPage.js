@@ -15,8 +15,9 @@ import { base_url } from "../App";
 import useToken from "../auth/Token";
 import AlertMessage from "./components/AlertMessage";
 import DirectoryTile from "./components/DirectoryTile";
+import Link from "@mui/material/Link";
 import IconButton from "@mui/material/IconButton";
-import DownloadIcon from "@mui/icons-material/Download";
+import SyncIcon from '@mui/icons-material/Sync';
 import CancelIcon from "@mui/icons-material/Cancel";
 import ScheduleTile from "./components/ScheduleTile";
 import { styled } from "@mui/material/styles";
@@ -31,6 +32,7 @@ export default function DashboardPage() {
   const [checked, setChecked] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [statusIsLoaded, setStatusIsLoaded] = useState(false);
+  const [status, setStatus] = useState(new Map());
 
   const { token } = useToken();
   let location = decodeURI(window.location.pathname.substr(6));
@@ -40,6 +42,11 @@ export default function DashboardPage() {
       getUserDirectories(token.user, location)
         .then((response) => {
           setFileData(response.data);
+          const initialStatus = new Map();
+          response.data?.files?.forEach((file) => {
+            initialStatus.set(file.name, "Pending");
+          });
+          setStatus(initialStatus);
           setIsLoaded(true);
         })
         .catch((error) => {
@@ -55,8 +62,19 @@ export default function DashboardPage() {
       (fileData?.directories?.length || fileData?.files?.length) &&
       !statusIsLoaded
     ) {
-      console.log(token);
-      updateSyncStatus(token.user, token.token.token, location, fileData?.files);
+      updateSyncStatus(token.user, token.token.token, location, fileData?.files)
+        .then((response) => {
+          const newStatus = new Map();
+          status.forEach((state, name) => {
+            newStatus.set(name, response[name]);
+            // console.log(state);
+            // console.log(name);
+          });
+          setStatus(newStatus);
+        })
+        .catch((error) => {
+          console.error(error);
+        });
       setStatusIsLoaded(true);
     }
   }, [isLoaded]);
@@ -152,9 +170,26 @@ export default function DashboardPage() {
     );
   }
 
+  const goBackToPreviousPage = () => {
+    const splitted = location.split("/");
+    console.log(splitted);
+    if (splitted.length > 1) {
+      splitted.pop();
+      return `/data/${splitted.join("/")}`;
+    }
+    return "/data/";
+  };
+
   return (
     <div>
       <Container maxWidth="md" component="main" sx={{ pt: 6, pb: 6 }}>
+        <Link
+          // href={data.link ? `/data/${data.location}/${data.name}` : "#"}
+          href={goBackToPreviousPage()}
+          underline="none"
+        >
+          {"<< Go Back"}
+        </Link>
         {showAlert ? (
           <AlertMessage
             message={alertContent}
@@ -191,7 +226,7 @@ export default function DashboardPage() {
                         {open ? (
                           <CancelIcon color="primary" />
                         ) : (
-                          <DownloadIcon color="primary" />
+                          <SyncIcon color="primary" />
                         )}
                       </IconButton>
                     )}
@@ -199,7 +234,6 @@ export default function DashboardPage() {
                   <StyledTableCell></StyledTableCell>
                   <StyledTableCell>Name</StyledTableCell>
                   <StyledTableCell align="right">Size</StyledTableCell>
-                  <StyledTableCell align="right">Last Accessed</StyledTableCell>
                   <StyledTableCell align="right">Status</StyledTableCell>
                   <StyledTableCell></StyledTableCell>
                 </TableRow>
@@ -239,6 +273,7 @@ export default function DashboardPage() {
                     type: file.extension,
                     checked: checked.includes(file.name) || allSelected,
                     last_synced: file.access_time,
+                    status: status.get(file.name),
                     handleChange: (e) => handleSelect(e, file.name),
                   };
                   return (
@@ -284,12 +319,11 @@ async function updateSyncStatus(username, token, location, files) {
   if (files && files.length > 0) {
     let url = `${base_url}/sync?username=${username}&token=${token}&location=${
       location ?? "/"
-    }&files=${files.map(file => file.name).join(",")}`;
+    }&files=${files.map((file) => file.name).join(",")}`;
     return axios
       .get(url)
       .then((response) => {
         if (response.data?.status === 200) {
-          console.log(response);
           return response.data?.data;
         } else {
           console.error(new Error(response.data?.message));
@@ -300,6 +334,5 @@ async function updateSyncStatus(username, token, location, files) {
         console.error(error);
         return error;
       });
-      
   }
 }

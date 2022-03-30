@@ -3,7 +3,7 @@ import TableCell from "@mui/material/TableCell";
 import TableRow from "@mui/material/TableRow";
 import Link from "@mui/material/Link";
 import IconButton from "@mui/material/IconButton";
-import DownloadIcon from "@mui/icons-material/Download";
+import SyncIcon from "@mui/icons-material/Sync";
 import CancelIcon from "@mui/icons-material/Cancel";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import ImageIcon from "@mui/icons-material/Image";
@@ -24,10 +24,25 @@ export default function DirectoryTile(props) {
   let synced_time;
   const [open, setOpen] = useState(false);
 
+  const getSyncStatus = (status, synced_time) => {
+    if (status === "Pending") {
+      return "Pending";
+    }
+    let last_updated = new Date(status);
+    if (!synced_time) {
+      return "Not Available Offline";
+    }
+    if (synced_time >= last_updated) {
+      return "Up To Date";
+    }
+    return "New Version Available";
+  };
+
   if (data.last_synced) {
     synced_time = new Date(data.last_synced);
     synced_time.addHours(5.5);
   }
+  let syncState = getSyncStatus(data.status, synced_time);
 
   return (
     <>
@@ -55,16 +70,9 @@ export default function DirectoryTile(props) {
           </Link>
         </TableCell>
         <TableCell align="right">{data.size}</TableCell>
-        <TableCell align="right">
-          {synced_time
-            ? synced_time.toLocaleDateString() +
-              "\n" +
-              synced_time.toLocaleTimeString()
-            : "N/A"}
-        </TableCell>
-        <TableCell align="right">{getSyncStatus(synced_time)}</TableCell>
+        <TableCell align="right">{syncState}</TableCell>
         <TableCell align="center">
-          {!data.checked && (
+          {!data.checked && (syncState === "Not Available Offline" || syncState === "New Version Available") && (
             <IconButton
               aria-label="expand row"
               size="small"
@@ -73,7 +81,7 @@ export default function DirectoryTile(props) {
               {open ? (
                 <CancelIcon color="primary" />
               ) : (
-                <DownloadIcon color="primary" />
+                <SyncIcon color="primary" />
               )}
             </IconButton>
           )}
@@ -102,11 +110,4 @@ const getFileTypeIcon = (type) => {
   } else {
     return <InsertDriveFileIcon color="primary" />;
   }
-};
-
-const getSyncStatus = (synced_time) => {
-  if (!synced_time) {
-    return "Not Synced";
-  }
-  return "Synced";
 };
