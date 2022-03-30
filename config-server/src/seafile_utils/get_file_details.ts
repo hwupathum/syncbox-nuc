@@ -18,20 +18,22 @@ export default function getFileDetails(
 }
 
 
-export function getFileDetailsByAxios(
+export async function getFileDetailsByAxios(
   token: string,
   path_hash: string,
   filename: string,
 ) {
-    axios.get(`${host}/api2/repos/${path_hash}/file/detail/?p=/${filename}`, {headers : {
+  try {
+    const results = await axios.get(`${host}/api2/repos/${path_hash}/file/detail/?p=/${filename}`, {headers : {
       'Accept': 'application/json; charset=utf-8; indent=4',
       'Authorization': `Token ${token}`
-    }}).then(function (response) {
-      // handle success
-      console.log(response.data);
-    })
-    .catch(function (error) {
-      // handle error
-      console.log(error);
-    }) 
+    }})
+
+    return results?.data;
+
+  } catch (e: any) {
+    console.log("Get File Details error", e?.message)
+  }
+    
+  
 }
